@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Update active link based on current page
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    let currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    currentPage = currentPage.split('?')[0].split('#')[0]; // Strip hashes/queries to fix broken active states
     const navLinks = document.querySelectorAll('.nav-link');
     
     navLinks.forEach(link => {
@@ -27,7 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.remove('active');
         }
     });
-<<<<<<< HEAD
+
+    // Update active link for Mobile Bottom Nav
+    const bottomNavLinks = document.querySelectorAll('.bottom-nav-link');
+    bottomNavLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
 
     // Product Details Modal Dynamic Logic
     const productCards = document.querySelectorAll('.product-card');
@@ -83,6 +93,4 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.toggle('active');
         });
     });
-=======
->>>>>>> 15479f889600dc9a2cc629b4695ebf5998164425
 });

@@ -38,7 +38,7 @@
     <!-- Features Section -->
     <section class="section">
         <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 40px;">
                 
                 <div style="text-align: center; padding: 30px; border: 1px solid var(--color-border); border-radius: var(--border-radius-lg); background: white;">
                     <div style="font-size: 3rem; margin-bottom: 20px;">🍯</div>
@@ -125,6 +125,26 @@
         <a href="https://wa.me/8801873520181" target="_blank" class="float-btn whatsapp-float" title="WhatsApp">💬</a>
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="bottom-nav-link">
+            <span class="icon">🏠</span>
+            <span>হোম</span>
+        </a>
+        <a href="products.html" class="bottom-nav-link">
+            <span class="icon">🛒</span>
+            <span>পণ্য</span>
+        </a>
+        <a href="tel:+8801873520181">
+            <span class="icon">📞</span>
+            <span>কল করুন</span>
+        </a>
+        <a href="https://wa.me/8801873520181" target="_blank">
+            <span class="icon">💬</span>
+            <span>WhatsApp</span>
+        </a>
+    </nav>
+
     <!-- Floating Translator Widget -->
     <div class="translator-widget">
         <div id="google_translate_element"></div>
@@ -140,6 +160,6 @@
             }, 'google_translate_element');
         }
     </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&hl=en"></script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&hl=en"></script>
 </body>
 </html>
