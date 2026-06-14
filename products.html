@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমাদের পণ্যসমূহ - সুন্দরবন হাট</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .category-header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 15px;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 50px; width: auto; border-radius: 0 !important;">
+                    সুন্দরবন হাট
+                </a>
+                <button class="mobile-menu-btn" aria-label="মেনু খুলুন">☰</button>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">হোম</a></li>
+                    <li><a href="products.html" class="nav-link active">পণ্যসমূহ</a></li>
+                    <li><a href="about.html" class="nav-link">আমাদের সম্পর্কে</a></li>
+                    <li><a href="why-us.html" class="nav-link">কেন আমরা</a></li>
+                    <li><a href="contact.html" class="nav-link">যোগাযোগ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Seasonal Banner -->
+    <div class="seasonal-banner">
+        <div class="container">
+            🌟 এখন পাওয়া যাচ্ছে: 🥭 সাতক্ষীরার আম | 🍯 সুন্দরবনের মধু | 🐟 তাজা চিংড়ি
+        </div>
+    </div>
+
+    <!-- Page Title -->
+    <section style="background-color: var(--color-background); padding: 40px 0; text-align: center;">
+        <div class="container">
+            <h1>আমাদের পণ্যসমূহ</h1>
+            <p>সুন্দরবনের গল্প, ঐতিহ্য এবং খাঁটি পণ্যের সমাহার।</p>
+        </div>
+    </section>
+
+    <!-- Premium Collection -->
+    <section class="section premium-section">
+        <div class="container">
+            <h2 class="section-title">সুন্দরবন গোল্ড কালেকশন</h2>
+            <p style="text-align: center; margin-bottom: 30px;">আমাদের সবচেয়ে প্রিমিয়াম এবং এক্সক্লুসিভ পণ্যের সমাহার</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card card-premium product-card" data-title="প্রিমিয়াম খলিশা মধু (গিফট বক্স)" data-subcategory="গোল্ড কালেকশন" data-price="৳১৫০০ / ১ কেজি" data-desc="সুন্দরবনের সবচেয়ে দুর্লভ খলিশা ফুলের মধু, সুন্দর একটি গিফট বক্সে প্যাকিং করা। কর্পোরেট গিফট বা প্রিয়জনকে উপহার দেওয়ার জন্য সেরা।" data-img="honey-box.png">
+                    <div class="card-img-wrapper"><img src="honey-box.png" alt="Premium Honey" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">প্রিমিয়াম সুন্দরবন খলিশা মধু (গিফট বক্স)</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">এক্সক্লুসিভ বক্সে প্যাকিং।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳১৫০০ / ১ কেজি</p>
+                        <button class="btn btn-gold view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card card-premium product-card" data-title="সুন্দরবন রয়্যাল প্যাকেজ" data-subcategory="গোল্ড কালেকশন" data-price="৳৩০০০" data-desc="খাঁটি মধু, দেশি ঘি, চিংড়ি শুঁটকি এবং আমের আচারের একটি স্পেশাল কম্বো প্যাক।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="Royal Package" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">সুন্দরবন রয়্যাল কম্বো প্যাকেজ</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">মধু, ঘি, শুঁটকি ও আচারের প্রিমিয়াম কম্বো।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৩০০০</p>
+                        <button class="btn btn-gold view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="section" style="padding-top: 20px;">
+        <div class="container">
+            
+            <!-- Honey Section -->
+            <h2 id="honey" class="category-header">সুন্দরবনের খাঁটি মধু</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="খলিশা ফুলের মধু" data-subcategory="সুন্দরবনের খাঁটি মধু" data-price="৳৮৫০ / ৫০০ গ্রাম" data-desc="সরাসরি সুন্দরবনের গহীন বন থেকে মৌয়ালদের মাধ্যমে চাক থেকে সংগৃহীত। এটি সম্পূর্ণ প্রাকৃতিক ও ভেজালমুক্ত, যা আপনার স্বাস্থ্য সুরক্ষায় কাজ করবে।" data-img="honeypack.png">
+                    <div class="card-img-wrapper"><img src="honeypack.png" alt="খলিশা ফুলের মধু" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">খলিশা ফুলের মধু</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">সরাসরি চাক থেকে সংগৃহীত।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৮৫০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="চাকের মধু" data-subcategory="সুন্দরবনের খাঁটি মধু" data-price="৳১০০০ / ৫০০ গ্রাম" data-desc="সুন্দরবনের আসল চাকসহ মধু। সরাসরি চাক কেটে বয়ামে ভরা হয়, তাই মধুর আসল স্বাদ ও গন্ধ অটুট থাকে।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="চাকের মধু" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">চাকের মধু</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">চাকসহ আসল মধু।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳১০০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="গরান ফুলের মধু" data-subcategory="সুন্দরবনের খাঁটি মধু" data-price="৳৯০০ / ৫০০ গ্রাম" data-desc="সুন্দরবনের গরান ফুল থেকে সংগৃহীত লালচে রঙের বিশেষ মধু। এর স্বাদ এবং ঘ্রাণ অত্যন্ত আকর্ষণীয়।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="গরান ফুলের মধু" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">গরান ফুলের মধু</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">লালচে রঙের বিশেষ মধু।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৯০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oil & Spices -->
+            <h2 id="spices" class="category-header">সরিষার তেল ও মসলা</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="কাঠের ঘানির সরিষার তেল" data-subcategory="সরিষার তেল ও মসলা" data-price="৳৩৫০ / ১ লিটার" data-desc="দেশি সরিষা থেকে কাঠের ঘানিতে ভাঙানো খাঁটি ও ভেজালমুক্ত তেল। এটি স্বাস্থ্যকর এবং রান্নায় আনে অসাধারণ স্বাদ।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="সরিষার তেল" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">কাঠের ঘানির সরিষার তেল</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">খাঁটি ও ভেজালমুক্ত।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৩৫০ / ১ লিটার</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="দেশি হলুদের গুঁড়া" data-subcategory="সরিষার তেল ও মসলা" data-price="৳৪০০ / ৫০০ গ্রাম" data-desc="রাসায়নিকমুক্ত দেশি হলুদ রোদে শুকিয়ে স্বাস্থ্যসম্মতভাবে গুঁড়া করা হয়েছে। রান্নায় আনে আসল রং ও স্বাদ।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="দেশি হলুদ" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">দেশি হলুদের গুঁড়া</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">রাসায়নিকমুক্ত, রোদে শুকানো।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৪০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fish -->
+            <h2 id="fish" class="category-header">সামুদ্রিক ও নদীর মাছ</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="চিংড়ি শুঁটকি" data-subcategory="সামুদ্রিক ও নদীর মাছ" data-price="৳৯০০ / ৫০০ গ্রাম" data-desc="দক্ষিণাঞ্চলের সেরা চিংড়ি থেকে রোদে শুকানো এবং সম্পূর্ণ পরিষ্কার শুঁটকি। কোনো ধরনের ক্ষতিকর রাসায়নিক বা প্রিজারভেটিভ নেই।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="চিংড়ি শুঁটকি" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">চিংড়ি শুঁটকি</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">পরিষ্কার ও রোদে শুকানো।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৯০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="লইট্টা ও ছুরি শুঁটকি" data-subcategory="সামুদ্রিক ও নদীর মাছ" data-price="৳৭০০ / ৫০০ গ্রাম" data-desc="কক্সবাজার ও দক্ষিণাঞ্চলের বাছাইকৃত লইট্টা ও ছুরি শুঁটকি। সম্পূর্ণ স্বাস্থ্যসম্মত উপায়ে রোদে শুকানো।" data-img="prawn.jpg">
+                    <div class="card-img-wrapper"><img src="prawn.jpg" alt="লইট্টা শুঁটকি" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">লইট্টা ও ছুরি শুঁটকি</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">কক্সবাজার ও দক্ষিণাঞ্চলের শুঁটকি।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৭০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="বাগদা ও গলদা চিংড়ি" data-subcategory="সামুদ্রিক ও নদীর মাছ" data-price="কল করে জানুন" data-desc="সরাসরি দক্ষিণাঞ্চলের ঘের থেকে সংগৃহীত তাজা বাগদা ও গলদা চিংড়ি। (সাইজ: ২০-২৫, ৩০-৩৫, ৩৫-৪০, ৫৫-৬০ পিস/কেজি)" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="তাজা মাছ" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">বাগদা ও গলদা চিংড়ি</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">সরাসরি ঘের থেকে। (সাইজ: ২০-২৫...)</p>
+                        <p class="card-price" style="margin-bottom: 15px;">কল করে জানুন</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="ভেটকি, কোরাল ও পারশে" data-subcategory="সামুদ্রিক ও নদীর মাছ" data-price="কল করে জানুন" data-desc="সামুদ্রিক ও নদীর তাজা ভেটকি, কোরাল ও পারশে মাছ। সম্পূর্ণ ফরমালিনমুক্ত এবং স্বাস্থ্যসম্মত।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="কোরাল মাছ" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">ভেটকি, কোরাল ও পারশে</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">তাজা সামুদ্রিক ও নদীর মাছ।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">কল করে জানুন</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gur Section -->
+            <h2 id="gur" class="category-header">গুড় বিভাগ</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="খেজুরের গুড়" data-subcategory="গুড় বিভাগ" data-price="৳৪০০ / ১ কেজি" data-desc="শীতকালীন খাঁটি খেজুরের গুড়। ঝোলা এবং পাটালি দুই ধরনেই পাওয়া যায়, যা পিঠা-পায়েস তৈরিতে অতুলনীয়।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="খেজুরের গুড়" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">খেজুরের গুড় (ঝোলা ও পাটালি)</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">শীতকালীন খাঁটি গুড়।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৪০০ / ১ কেজি</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="দেশি আখের গুড়" data-subcategory="গুড় বিভাগ" data-price="৳২০০ / ১ কেজি" data-desc="সরাসরি কৃষকের কাছ থেকে সংগৃহীত দেশি আখের গুড়। সম্পূর্ণ প্রাকৃতিক এবং ভেজালমুক্ত।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="আখের গুড়" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">দেশি আখের গুড়</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">সরাসরি কৃষকের কাছ থেকে।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳২০০ / ১ কেজি</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="খাঁটি তালের গুড়" data-subcategory="গুড় বিভাগ" data-price="৳৪৫০ / ১ কেজি" data-desc="গ্রাম বাংলার ঐতিহ্যবাহী স্বাদের খাঁটি তালের গুড়। সম্পূর্ণ নিজস্ব তত্ত্বাবধানে প্রস্তুত করা হয়।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="তালের গুড়" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">খাঁটি তালের গুড়</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">ঐতিহ্যবাহী স্বাদ।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৪৫০ / ১ কেজি</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pickles Section -->
+            <h2 id="pickles" class="category-header">আচার বিভাগ</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="আমের আচার" data-subcategory="আচার বিভাগ" data-price="৳৩০০ / ৫০০ গ্রাম" data-desc="ঘরোয়া পরিবেশে সম্পূর্ণ স্বাস্থ্যসম্মত উপায়ে তৈরি টক-ঝাল-মিষ্টি আমের আচার।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="আমের আচার" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">আমের আচার</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">ঘরোয়া পরিবেশে তৈরি।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৩০০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="মিশ্র আচার" data-subcategory="আচার বিভাগ" data-price="৳৩৫০ / ৫০০ গ্রাম" data-desc="টক-ঝাল-মিষ্টি স্বাদের কুল, জলপাই ও মিশ্র আচার। এটি যেকোনো খাবারের সাথে পরিবেশন করা যায়।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="মিশ্র আচার" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">কুল, জলপাই ও মিশ্র আচার</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">টক-ঝাল-মিষ্টি স্বাদ।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">৳৩৫০ / ৫০০ গ্রাম</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seasonal Fruits Section -->
+            <h2 id="fruits" class="category-header">মৌসুমি ফল</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="সাতক্ষীরার আম" data-subcategory="মৌসুমি ফল" data-price="মৌসুম অনুযায়ী" data-desc="সাতক্ষীরার বিখ্যাত প্রিমিয়াম সুপার গ্রেড রূপালী আম (হালকা পাকা)। সম্পূর্ণ অর্গানিক ও বিষমুক্ত।" data-img="mango.JPG">
+                    <div class="card-img-wrapper"><img src="mango.JPG" alt="আম" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">সাতক্ষীরার আম</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">প্রিমিয়াম সুপার গ্রেড রূপালী আম।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">মৌসুম অনুযায়ী</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+                <div class="card product-card" data-title="লিচু ও অন্যান্য" data-subcategory="মৌসুমি ফল" data-price="মৌসুম অনুযায়ী" data-desc="সরাসরি বাগান থেকে সংগৃহীত তাজা লিচু, নারিকেল, তাল, এবং পেয়ারা। মৌসুম অনুযায়ী পাওয়া যায়।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="লিচু" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">লিচু ও অন্যান্য</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">লিচু, নারিকেল, তাল, পেয়ারা।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">মৌসুম অনুযায়ী</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sweets & Desserts
+            <h2 id="sweets" class="category-header">হোমমেড ও ডেজার্ট আইটেম</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="হোমমেড মিষ্টি" data-subcategory="হোমমেড ও ডেজার্ট" data-price="কল করে জানুন" data-desc="ঘরে তৈরি সম্পূর্ণ স্বাস্থ্যসম্মত মিষ্টি ও ডেজার্ট। এটি খেতে অত্যন্ত সুস্বাদু।" data-img="comingsoon.png">
+                    <div class="card-img-wrapper"><img src="comingsoon.png" alt="হোমমেড মিষ্টি" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">হোমমেড মিষ্টি</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">ঘরে তৈরি সম্পূর্ণ স্বাস্থ্যসম্মত মিষ্টি।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">কল করে জানুন</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- Grains -->
+            <h2 id="grains" class="category-header">চাল ও শস্য</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="card product-card" data-title="খাঁটি আতপ চাল" data-subcategory="চাল ও শস্য" data-price="আসন্ন" data-desc="সরাসরি কৃষকের থেকে সংগ্রহ করা খাঁটি আতপ চাল। (খুব শিগগিরই আসছে)" data-img="rice.png">
+                    <div class="card-img-wrapper"><img src="rice.png" alt="আতপ চাল" class="card-img"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">খাঁটি আতপ চাল</h3>
+                        <p class="card-desc" style="margin-bottom: 10px;">সরাসরি কৃষকের থেকে সংগ্রহ করা।</p>
+                        <p class="card-price" style="margin-bottom: 15px;">আসন্ন</p>
+                        <button class="btn btn-outline view-details-btn" style="width: 100%;">বিস্তারিত দেখুন</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Story-Driven Product Details Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content story-modal">
+            <button class="modal-close" id="closeModal" style="color: black; background: white; border-radius: 50%; width: 40px; height: 40px; top: 10px; right: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; font-size: 1.5rem; line-height: 1;">&times;</button>
+            <div class="modal-grid">
+                
+                <!-- Left Gallery & Story -->
+                <div class="modal-gallery">
+                    <div class="modal-img-main">
+                        <img src="" alt="Product Image" id="modalImg">
+                    </div>
+                    
+                    <div class="modal-authenticity-card">
+                        <h4 style="color: var(--color-primary); margin-bottom: 10px;">🛡️ সার্টিফিকেট অফ অথেনটিসিটি</h4>
+                        <p style="font-size: 0.9rem; color: var(--color-text-light); margin-bottom: 10px;">আমরা সরাসরি শ্যামনগর অঞ্চলের প্রান্তিক উৎপাদক ও মৌয়ালদের কাছ থেকে এই পণ্য সংগ্রহ করি।</p>
+                        <div style="font-weight: bold; color: var(--color-secondary);">✓ ১০০% খাঁটি ও প্রাকৃতিক</div>
+                    </div>
+
+                    <div style="background: white; padding: 20px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow); margin-top: 20px;">
+                        <div style="color: #F9A825; font-size: 1.2rem; margin-bottom: 5px;">★★★★★</div>
+                        <p style="font-style: italic; font-size: 0.9rem; color: var(--color-text-light);">"পণ্যটি হাতে পেলাম। প্যাকেজিং এবং কোয়ালিটি এক কথায় অসাধারণ। সুন্দরবন হাটের জন্য শুভকামনা।"</p>
+                        <div style="font-size: 0.8rem; font-weight: bold; margin-top: 10px;">- ভেরিফায়েড কাস্টমার</div>
+                    </div>
+                </div>
+
+                <!-- Right Details -->
+                <div class="modal-details">
+                    <div class="modal-meta">
+                        <span>📍 শ্যামনগর, সাতক্ষীরা</span>
+                        <span>🌿 সুন্দরবন উৎস</span>
+                    </div>
+                    
+                    <h2 class="modal-title" id="modalTitle" style="font-size: 2rem; margin-bottom: 5px;">Product Title</h2>
+                    <div class="modal-subcategory" id="modalSubcategory" style="margin-bottom: 15px;">Subcategory</div>
+                    
+                    <div class="modal-price" id="modalPrice" style="border:none; padding:0; background:none; font-size: 1.8rem; margin-bottom: 15px;">Price</div>
+
+                    <div class="story-badges">
+                        <span>✓ খাঁটি পণ্য</span>
+                        <span>✓ সরাসরি উৎস থেকে</span>
+                        <span>✓ নিরাপদ প্যাকেজিং</span>
+                        <span>✓ সারা বাংলাদেশ ডেলিভারি</span>
+                    </div>
+
+                    <div class="modal-actions" style="margin-bottom: 20px;">
+                        <a href="tel:+8801873520181" class="btn btn-primary" style="flex: 1;">📞 ফোনে অর্ডার</a>
+                        <a href="https://wa.me/8801873520181" target="_blank" class="btn btn-whatsapp" style="flex: 1;">💬 WhatsApp অর্ডার</a>
+                    </div>
+
+                    <div class="story-box">
+                        <h3 style="margin-bottom: 10px;">পণ্যের গল্প</h3>
+                        <p id="modalDesc" style="font-style: italic;">Product details will go here.</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">প্রতিটি পণ্য সুন্দরবনের প্রকৃতি এবং মানুষের জীবনের গল্পের সাথে জড়িত। এটি শুধু একটি পণ্য নয়, প্রান্তিক মানুষের পরিশ্রমের ফসল।</p>
+                    </div>
+
+                    <div class="story-timeline">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--color-text-light);">পণ্যটি কোথা থেকে আসে?</h3>
+                        <div class="timeline-steps">
+                            <div>🌳<br>সুন্দরবন</div>
+                            <div>↓</div>
+                            <div>👨‍🌾<br>উৎপাদক</div>
+                            <div>↓</div>
+                            <div>📦<br>প্যাকেজিং</div>
+                            <div>↓</div>
+                            <div>🚚<br>কুরিয়ার</div>
+                            <div>↓</div>
+                            <div>🏠<br>আপনার ঘর</div>
+                        </div>
+                    </div>
+
+                    <div class="story-accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">পুষ্টিগুণ ও উপকারিতা</button>
+                            <div class="accordion-content">
+                                <ul style="list-style: none; margin-top: 10px;">
+                                    <li style="margin-bottom: 5px;">🍯 প্রাকৃতিক শক্তির উৎস</li>
+                                    <li style="margin-bottom: 5px;">❤️ হৃদযন্ত্রের জন্য উপকারী</li>
+                                    <li style="margin-bottom: 5px;">🛡️ রোগ প্রতিরোধ ক্ষমতা বৃদ্ধি করে</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">পণ্য ব্যবহারের নিয়ম</button>
+                            <div class="accordion-content">
+                                <p style="margin-top: 10px;">সঠিক নিয়মে ব্যবহার করলে পণ্যের আসল গুণাগুণ পাওয়া যায়। আর্দ্রতামুক্ত ও পরিষ্কার স্থানে সংরক্ষণ করুন।</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">ডেলিভারি ও রিটার্ন পলিসি</button>
+                            <div class="accordion-content">
+                                <p style="margin-top: 10px;">সারা বাংলাদেশে ২-৫ দিনের মধ্যে হোম ডেলিভারি দেওয়া হয়। পণ্যে কোনো সমস্যা থাকলে শর্তসাপেক্ষে রিটার্ন সুবিধা রয়েছে।</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="nav-brand" style="color: white; margin-bottom: 20px;">
+                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 60px; width: auto; border-radius: 0 !important;">
+                        সুন্দরবন হাট
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">সুন্দরবনের খাঁটি খাবার, সরাসরি আপনার ঘরে। শ্যামনগর, সাতক্ষীরা থেকে নিরাপদ ও প্রাকৃতিক খাদ্যপণ্য।</p>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">গুরুত্বপূর্ণ লিংক</h3>
+                    <ul>
+                        <li><a href="index.html">হোম</a></li>
+                        <li><a href="products.html">আমাদের পণ্যসমূহ</a></li>
+                        <li><a href="about.html">আমাদের সম্পর্কে</a></li>
+                        <li><a href="why-us.html">কেন আমরা</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">যোগাযোগ</h3>
+                    <ul style="color: rgba(255,255,255,0.8);">
+                        <li>ফোন: <a href="tel:+8801873520181" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>WhatsApp: <a href="https://wa.me/8801873520181" target="_blank" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>ঠিকানা: শ্যামনগর, সাতক্ষীরা, বাংলাদেশ</li>
+                        <li style="margin-top: 10px;"><a href="https://facebook.com" target="_blank" style="color: var(--color-secondary); font-weight: bold;">Facebook Page</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত। Managed by <a href="https://www.authbrain.io" target="_blank" style="color: var(--color-secondary); font-weight: bold;">AuthBrain</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <a href="tel:+8801873520181" class="float-btn call-float" title="কল করুন">📞</a>
+        <a href="https://wa.me/8801873520181" target="_blank" class="float-btn whatsapp-float" title="WhatsApp">💬</a>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html">
+            <span class="icon">🏠</span>
+            <span>হোম</span>
+        </a>
+        <a href="products.html" class="active">
+            <span class="icon">🛒</span>
+            <span>পণ্য</span>
+        </a>
+        <a href="tel:+8801873520181">
+            <span class="icon">📞</span>
+            <span>কল করুন</span>
+        </a>
+        <a href="https://wa.me/8801873520181" target="_blank">
+            <span class="icon">💬</span>
+            <span>WhatsApp</span>
+        </a>
+    </nav>
+
+    <!-- Floating Translator Widget -->
+    <div class="translator-widget">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'bn'
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&hl=en"></script>
+</body>
+</html>

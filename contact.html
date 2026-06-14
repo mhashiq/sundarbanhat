@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>যোগাযোগ - সুন্দরবন হাট</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .contact-info-card {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 5px 15px var(--color-shadow);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .contact-icon {
+            font-size: 2.5rem;
+            color: var(--color-primary);
+            background: var(--color-background);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        /* FAQ Styles */
+        .faq-item {
+            background: white;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px var(--color-shadow);
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+        }
+        .faq-answer {
+            padding: 0 20px 20px;
+            display: none;
+            color: var(--color-text-light);
+        }
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+        .faq-item.active .faq-question::after {
+            content: '-';
+        }
+        
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 50px; width: auto; border-radius: 0 !important;">
+                    সুন্দরবন হাট
+                </a>
+                <button class="mobile-menu-btn" aria-label="মেনু খুলুন">☰</button>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">হোম</a></li>
+                    <li><a href="products.html" class="nav-link">পণ্যসমূহ</a></li>
+                    <li><a href="about.html" class="nav-link">আমাদের সম্পর্কে</a></li>
+                    <li><a href="why-us.html" class="nav-link">কেন আমরা</a></li>
+                    <li><a href="contact.html" class="nav-link active">যোগাযোগ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title -->
+    <section style="background-color: var(--color-background); padding: 40px 0; text-align: center;">
+        <div class="container">
+            <h1>যোগাযোগ করুন</h1>
+            <p>অর্ডার করতে বা যেকোনো তথ্যের জন্য আমাদের সাথে যোগাযোগ করুন।</p>
+        </div>
+    </section>
+
+    <!-- Contact & Map Section -->
+    <section class="section">
+        <div class="container">
+            <div class="contact-grid">
+                
+                <!-- Contact Info -->
+                <div>
+                    <h2 style="margin-bottom: 30px; color: var(--color-primary);">যোগাযোগের মাধ্যম</h2>
+                    
+                    <a href="tel:+8801873520181" style="display: block; text-decoration: none; color: inherit;">
+                        <div class="contact-info-card">
+                            <div class="contact-icon">📞</div>
+                            <div>
+                                <h3 style="margin-bottom: 5px;">ফোন করুন</h3>
+                                <p style="font-size: 1.2rem; font-weight: bold;">01873-520181</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://wa.me/8801873520181" target="_blank" style="display: block; text-decoration: none; color: inherit;">
+                        <div class="contact-info-card">
+                            <div class="contact-icon" style="color: #25D366;">💬</div>
+                            <div>
+                                <h3 style="margin-bottom: 5px;">WhatsApp</h3>
+                                <p style="font-size: 1.2rem; font-weight: bold;">01873-520181</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://www.facebook.com/sundarbanhat" target="_blank" style="display: block; text-decoration: none; color: inherit;">
+                        <div class="contact-info-card">
+                            <div class="contact-icon" style="color: #1877F2;">f</div>
+                            <div>
+                                <h3 style="margin-bottom: 5px;">Facebook Page</h3>
+                                <p style="font-size: 1.2rem; font-weight: bold;">সুন্দরবন হাট</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div class="contact-info-card">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3 style="margin-bottom: 5px;">আমাদের ঠিকানা</h3>
+                            <p>শ্যামনগর, সাতক্ষীরা,<br>বাংলাদেশ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div>
+                    <h2 style="margin-bottom: 30px; color: var(--color-primary);">সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQ)</h2>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">কীভাবে অর্ডার করবো?</div>
+                        <div class="faq-answer">পণ্য নির্বাচন করে আমাদের ফোন নম্বরে (01873-520181) কল করুন অথবা WhatsApp এ মেসেজ দিন। আপনার ঠিকানা ও পণ্যের বিবরণ দিলেই অর্ডার কনফার্ম হবে।</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">পণ্য কত দিনের মধ্যে পৌঁছাবে?</div>
+                        <div class="faq-answer">অর্ডার কনফার্ম হওয়ার পর সাধারণত ২-৫ কর্মদিবসের মধ্যে কুরিয়ারের মাধ্যমে পণ্য পৌঁছে দেওয়া হয়।</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">পণ্য কোথা থেকে সংগ্রহ করা হয়?</div>
+                        <div class="faq-answer">আমাদের সমস্ত পণ্য সরাসরি শ্যামনগর, সাতক্ষীরা এবং সুন্দরবন সংলগ্ন এলাকা থেকে উৎপাদক ও মৌয়ালদের কাছ থেকে সংগ্রহ করা হয়।</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">ডেলিভারি চার্জ কত?</div>
+                        <div class="faq-answer">ডেলিভারি চার্জ আপনার লোকেশন এবং পণ্যের ওজনের উপর নির্ভর করে। অর্ডার করার সময় আমাদের প্রতিনিধি আপনাকে ডেলিভারি চার্জ জানিয়ে দেবেন।</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Placeholder -->
+    <section style="height: 400px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--color-text-light);">
+        <div>
+            <h2 style="color: var(--color-primary); margin-bottom: 10px;">শ্যামনগর, সাতক্ষীরা</h2>
+            <p>[Google Map Placeholder]</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">(এখানে পরবর্তীতে গুগলের এমবেড ম্যাপ যুক্ত করা হবে)</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="nav-brand" style="color: white; margin-bottom: 20px;">
+                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 60px; width: auto; border-radius: 0 !important;">
+                        সুন্দরবন হাট
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">সুন্দরবনের খাঁটি খাবার, সরাসরি আপনার ঘরে। শ্যামনগর, সাতক্ষীরা থেকে নিরাপদ ও প্রাকৃতিক খাদ্যপণ্য।</p>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">গুরুত্বপূর্ণ লিংক</h3>
+                    <ul>
+                        <li><a href="index.html">হোম</a></li>
+                        <li><a href="products.html">আমাদের পণ্যসমূহ</a></li>
+                        <li><a href="about.html">আমাদের সম্পর্কে</a></li>
+                        <li><a href="why-us.html">কেন আমরা</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">যোগাযোগ</h3>
+                    <ul style="color: rgba(255,255,255,0.8);">
+                        <li>ফোন: <a href="tel:+8801873520181" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>WhatsApp: <a href="https://wa.me/8801873520181" target="_blank" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>ঠিকানা: শ্যামনগর, সাতক্ষীরা, বাংলাদেশ</li>
+                        <li style="margin-top: 10px;"><a href="https://www.facebook.com/sundarbanhat" target="_blank" style="color: var(--color-secondary); font-weight: bold;">Facebook Page</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত। Managed by <a href="https://www.authbrain.io" target="_blank" style="color: var(--color-secondary); font-weight: bold;">AuthBrain</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <a href="tel:+8801873520181" class="float-btn call-float" title="কল করুন">📞</a>
+        <a href="https://wa.me/8801873520181" target="_blank" class="float-btn whatsapp-float" title="WhatsApp">💬</a>
+    </div>
+
+    <!-- Floating Translator Widget -->
+    <div class="translator-widget">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        // Simple FAQ Toggle Script
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', event => {
+                const parent = event.target.parentElement;
+                parent.classList.toggle('active');
+            })
+        })
+    </script>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'bn'
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&hl=en"></script>
+</body>
+</html>
