@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.remove('active');
         }
     });
+<<<<<<< HEAD
 
     // Product Details Modal Dynamic Logic
     const productCards = document.querySelectorAll('.product-card');
@@ -82,4 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.toggle('active');
         });
     });
+=======
+>>>>>>> 15479f889600dc9a2cc629b4695ebf5998164425
 });

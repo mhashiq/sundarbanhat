@@ -200,6 +200,7 @@ img {
   border-radius: 2px;
 }
 
+<<<<<<< HEAD
 /* Trust Badges */
 .trust-badge {
   background: var(--color-background);
@@ -223,6 +224,8 @@ img {
   margin: 0 auto 20px;
 }
 
+=======
+>>>>>>> 15479f889600dc9a2cc629b4695ebf5998164425
 /* Card Styling - Mangrove Leaf Motif / Soft Curves */
 .card {
   background-color: var(--color-white);
@@ -352,6 +355,7 @@ img {
   background-color: var(--color-primary);
 }
 
+<<<<<<< HEAD
 /* Floating Translator Widget */
 .translator-widget {
   position: fixed;
@@ -371,6 +375,8 @@ img {
   margin-right: 5px;
 }
 
+=======
+>>>>>>> 15479f889600dc9a2cc629b4695ebf5998164425
 /* Media Queries */
 @media (max-width: 768px) {
   .nav-menu {
@@ -397,6 +403,7 @@ img {
     font-size: 1.5rem;
   }
 }
+<<<<<<< HEAD
 
 /* Google Translate Clean Styling */
 .goog-te-banner-frame.skiptranslate {
@@ -797,3 +804,5 @@ body {
     grid-template-columns: 1fr;
   }
 }
+=======
+>>>>>>> 15479f889600dc9a2cc629b4695ebf5998164425
