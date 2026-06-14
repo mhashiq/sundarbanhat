@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমাদের সম্পর্কে - সুন্দরবন হাট</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .story-section {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+        .story-section:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+        .story-content {
+            flex: 1;
+        }
+        .story-image {
+            flex: 1;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--color-shadow);
+        }
+        @media (max-width: 768px) {
+            .story-section, .story-section:nth-child(even) {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 50px; width: auto; border-radius: 0 !important;">
+                    সুন্দরবন হাট
+                </a>
+                <button class="mobile-menu-btn" aria-label="মেনু খুলুন">☰</button>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">হোম</a></li>
+                    <li><a href="products.html" class="nav-link">পণ্যসমূহ</a></li>
+                    <li><a href="about.html" class="nav-link active">আমাদের সম্পর্কে</a></li>
+                    <li><a href="why-us.html" class="nav-link">কেন আমরা</a></li>
+                    <li><a href="contact.html" class="nav-link">যোগাযোগ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title -->
+    <section style="background-color: var(--color-background); padding: 60px 0; text-align: center;">
+        <div class="container">
+            <h1 style="font-size: 2.5rem;">সুন্দরবনের গল্প</h1>
+            <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">প্রকৃতির অপরূপ উপহার, সুন্দরবন থেকে সংগৃহীত খাঁটি পণ্যের পেছনের গল্প।</p>
+        </div>
+    </section>
+
+    <!-- Story Content -->
+    <section class="section">
+        <div class="container">
+            
+            <div class="story-section">
+                <div class="story-content">
+                    <h2 style="color: var(--color-secondary);">সুন্দরবনের ইতিহাস ও ঐতিহ্য</h2>
+                    <p style="margin-bottom: 15px;">বিশ্বের সর্ববৃহৎ ম্যানগ্রোভ বন সুন্দরবন শুধু জীববৈচিত্র্যের জন্যই নয়, বরং এখানকার প্রাকৃতিক সম্পদের জন্যও বিখ্যাত। যুগ যুগ ধরে এই অঞ্চলের মানুষ প্রকৃতির সাথে লড়াই করে তাদের জীবিকা নির্বাহ করে আসছে।</p>
+                    <p>আমাদের 'সুন্দরবন হাট' এর মূল লক্ষ্য হলো এই প্রাকৃতিক ঐশ্বর্যকে দেশের প্রতিটি প্রান্তে পৌঁছে দেওয়া। আমরা শ্যামনগর, সাতক্ষীরা কেন্দ্রিক একটি উদ্যোগ, যারা সরাসরি সুন্দরবন এবং এর আশেপাশের অঞ্চল থেকে পণ্য সংগ্রহ করে থাকি।</p>
+                </div>
+                <div class="story-image">
+                    <img src="https://placehold.co/600x400/1B5E20/FFFFFF?text=সুন্দরবনের+দৃশ্য" alt="সুন্দরবনের দৃশ্য">
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-content">
+                    <h2 style="color: var(--color-secondary);">মৌয়ালদের জীবন ও মধু সংগ্রহ</h2>
+                    <p style="margin-bottom: 15px;">সুন্দরবনের মধু বিশ্ববিখ্যাত। এপ্রিল থেকে জুন মাস পর্যন্ত মৌয়ালরা জীবনের ঝুঁকি নিয়ে গহীন বনে প্রবেশ করে মধু সংগ্রহ করেন। গরান, খলিশা ও কেওড়া ফুলের এই মধু স্বাদে ও গুণে অতুলনীয়।</p>
+                    <p>আমরা সরাসরি এই সাহসী মৌয়ালদের কাছ থেকে মধু সংগ্রহ করি, যার ফলে আপনারা পান ১০০% খাঁটি কাঁচা মধু এবং মৌয়ালরাও পান তাদের নায্য মূল্য।</p>
+                </div>
+                <div class="story-image">
+                    <img src="https://placehold.co/600x400/F9A825/FFFFFF?text=মধু+সংগ্রহ" alt="মধু সংগ্রহ">
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-content">
+                    <h2 style="color: var(--color-secondary);">স্থানীয় কৃষকদের গল্প</h2>
+                    <p style="margin-bottom: 15px;">দক্ষিণাঞ্চলের মাটি ও জলবায়ু নির্দিষ্ট কিছু ফসলের জন্য আশীর্বাদস্বরূপ। আমাদের সরিষার তেল, হলুদের গুঁড়া এবং দেশি গুড় তৈরি হয় স্থানীয় কৃষকদের পরম যতন ও ভালোবাসায়।</p>
+                    <p>রাসায়নিক সার ও কীটনাশকমুক্ত উপায়ে উৎপাদিত এই পণ্যগুলো কাঠের ঘানিতে ভাঙানো বা রোদে শুকিয়ে প্রক্রিয়াজাত করা হয়, যাতে এর প্রাকৃতিক গুণাগুণ অটুট থাকে।</p>
+                </div>
+                <div class="story-image">
+                    <img src="https://placehold.co/600x400/8D6E63/FFFFFF?text=কৃষক" alt="কৃষক">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Video Gallery Placeholder -->
+    <section class="section" style="background-color: var(--color-background);">
+        <div class="container">
+            <h2 class="section-title">ভিডিও গ্যালারি</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
+                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ মধু সংগ্রহের ভিডিও</div>
+                    <h4 style="margin-top: 15px; text-align: center;">কীভাবে আমরা মধু সংগ্রহ করি</h4>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
+                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ ঘানিতে সরিষা ভাঙানোর ভিডিও</div>
+                    <h4 style="margin-top: 15px; text-align: center;">কাঠের ঘানির সরিষার তেল</h4>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
+                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ মাছ ধরার ভিডিও</div>
+                    <h4 style="margin-top: 15px; text-align: center;">দক্ষিণাঞ্চলের তাজা মাছ</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="nav-brand" style="color: white; margin-bottom: 20px;">
+                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 60px; width: auto; border-radius: 0 !important;">
+                        সুন্দরবন হাট
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">সুন্দরবনের খাঁটি খাবার, সরাসরি আপনার ঘরে। শ্যামনগর, সাতক্ষীরা থেকে নিরাপদ ও প্রাকৃতিক খাদ্যপণ্য।</p>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">গুরুত্বপূর্ণ লিংক</h3>
+                    <ul>
+                        <li><a href="index.html">হোম</a></li>
+                        <li><a href="products.html">আমাদের পণ্যসমূহ</a></li>
+                        <li><a href="about.html">আমাদের সম্পর্কে</a></li>
+                        <li><a href="why-us.html">কেন আমরা</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 style="margin-bottom: 20px;">যোগাযোগ</h3>
+                    <ul style="color: rgba(255,255,255,0.8);">
+                        <li>ফোন: <a href="tel:+8801873520181" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>WhatsApp: <a href="https://wa.me/8801873520181" target="_blank" style="color: var(--color-secondary);">01873-520181</a></li>
+                        <li>ঠিকানা: শ্যামনগর, সাতক্ষীরা, বাংলাদেশ</li>
+                        <li style="margin-top: 10px;"><a href="https://facebook.com" target="_blank" style="color: var(--color-secondary); font-weight: bold;">Facebook Page</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2024 সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত।
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <a href="tel:+8801873520181" class="float-btn call-float" title="কল করুন">📞</a>
+        <a href="https://wa.me/8801873520181" target="_blank" class="float-btn whatsapp-float" title="WhatsApp">💬</a>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
