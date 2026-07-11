@@ -15,7 +15,9 @@ import { Contact } from './pages/Contact';
 import { FaqPage } from './pages/Faq';
 import { PolicyPage } from './pages/Policy';
 import { AdminGuard } from './components/AdminGuard';
+import { CustomerGuard } from './components/CustomerGuard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminLogin } from './pages/AdminLogin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Account } from './pages/Account';
@@ -54,19 +56,23 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:productId" element={<ProductDetails />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-success/:orderId" element={<OrderSuccess />} />
           <Route path="/about" element={<About />} />
           <Route path="/why-us" element={<WhyUs />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* Customer Routes */}
+          {/* Customer Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/account" element={<Account />} />
+          
+          {/* Protected Customer Routes */}
+          <Route element={<CustomerGuard />}>
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success/:orderId" element={<OrderSuccess />} />
+            <Route path="/account" element={<Account />} />
+          </Route>
           
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminGuard />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Route>

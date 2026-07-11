@@ -234,7 +234,7 @@ export const Header: React.FC = () => {
             ) : (
               <li>
                 <NavLink to="/login" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontWeight: 'bold' }}>
-                  লগইন / সাইন-আপ 🔑
+                  অ্যাকাউন্ট 👤
                 </NavLink>
               </li>
             )}

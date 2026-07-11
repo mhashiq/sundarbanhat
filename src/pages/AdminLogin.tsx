@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
 import { Helmet } from 'react-helmet-async';
-import { Lock, Phone, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Lock, Mail, AlertTriangle, CheckCircle } from 'lucide-react';
 
-export const Login: React.FC = () => {
-  const [phoneInput, setPhoneInput] = useState('');
+export const AdminLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // If already logged in, redirect based on role
+  // If already logged in as admin, redirect directly
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -25,8 +25,6 @@ export const Login: React.FC = () => {
 
         if (adminRecord) {
           navigate('/admin/dashboard', { replace: true });
-        } else {
-          navigate('/account', { replace: true });
         }
       }
     };
@@ -38,36 +36,22 @@ export const Login: React.FC = () => {
     setErrorMsg('');
     setSuccessMsg('');
 
-    const inputVal = phoneInput.trim();
-    if (!inputVal || !password) {
-      setErrorMsg('মোবাইল নম্বর ও পাসওয়ার্ড প্রদান করুন।');
+    if (!email.trim() || !password) {
+      setErrorMsg('ইমেইল ও পাসওয়ার্ড প্রদান করুন।');
       return;
     }
 
     setLoading(true);
 
     try {
-      let loginEmail = inputVal;
-
-      // Behind the scenes check: if it does NOT contain '@', map it as a customer phone
-      if (!loginEmail.includes('@')) {
-        const cleanPhone = loginEmail.replace(/\s+/g, '');
-        if (!/^\d{11}$/.test(cleanPhone)) {
-          setErrorMsg('মোবাইল নম্বরটি অবশ্যই ১১ ডিজিটের হতে হবে।');
-          setLoading(false);
-          return;
-        }
-        loginEmail = `${cleanPhone}@customer.sundarbanhat.com`;
-      }
-
-      // Log in with Supabase Auth
+      // 1. Authenticate with Supabase Auth
       const { data: { session }, error: loginError } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
+        email: email.trim(),
         password: password
       });
 
       if (loginError) {
-        setErrorMsg('লগইন ব্যর্থ হয়েছে! মোবাইল নম্বর অথবা পাসওয়ার্ডটি সঠিক নয়।');
+        setErrorMsg('লগইন ব্যর্থ হয়েছে! ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।');
         setLoading(false);
         return;
       }
@@ -78,29 +62,28 @@ export const Login: React.FC = () => {
         return;
       }
 
-      // Check if user is admin - customers ONLY login page
-      const { data: adminRecord } = await supabase
+      // 2. Verify admin rights against admin_users table
+      const { data: adminRecord, error: dbError } = await supabase
         .from('admin_users')
         .select('id')
         .eq('id', session.user.id)
         .maybeSingle();
 
-      if (adminRecord) {
-        // Sign out immediately, admins are not allowed to use this login route!
+      if (dbError || !adminRecord) {
+        // Not an admin! Log them out immediately
         await supabase.auth.signOut();
-        setErrorMsg('এই লগইন পেজটি শুধুমাত্র কাস্টমারদের জন্য। অ্যাডমিনদের অবশ্যই অ্যাডমিন পোর্টাল ব্যবহার করতে হবে।');
+        setErrorMsg('অ্যাক্সেস প্রত্যাখ্যান করা হয়েছে! আপনি একজন রেজিস্টার্ড অ্যাডমিন নন।');
         setLoading(false);
         return;
       }
 
-      setSuccessMsg('লগইন সফল হয়েছে! আপনাকে কাস্টমার ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...');
-
+      setSuccessMsg('লগইন সফল হয়েছে! আপনাকে অ্যাডমিন ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...');
       setTimeout(() => {
-        navigate('/account', { replace: true });
+        navigate('/admin/dashboard', { replace: true });
       }, 1200);
 
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error('Admin login error:', err);
       setErrorMsg('লগইন প্রক্রিয়ায় ত্রুটি দেখা দিয়েছে। আবার চেষ্টা করুন।');
     } finally {
       setLoading(false);
@@ -110,8 +93,8 @@ export const Login: React.FC = () => {
   return (
     <section className="section" style={{ backgroundColor: 'var(--color-sand)', minHeight: '80vh', display: 'flex', alignItems: 'center', paddingTop: '40px' }}>
       <Helmet>
-        <title>লগইন করুন - সুন্দরবন হাট</title>
-        <meta name="description" content="সুন্দরবন হাটের কাস্টমার অ্যাকাউন্টে লগইন করুন।" />
+        <title>অ্যাডমিন লগইন - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের অ্যাডমিন প্যানেলে প্রবেশ করুন।" />
       </Helmet>
 
       <div className="container" style={{ maxWidth: '420px', margin: '0 auto' }}>
@@ -121,16 +104,16 @@ export const Login: React.FC = () => {
           background: '#fff',
           padding: '40px 30px',
           borderRadius: 'var(--border-radius-lg)',
-          border: '1px solid var(--color-border)',
+          border: '1.5px solid var(--color-mud)',
           boxShadow: '0 15px 35px var(--color-shadow)',
           textAlign: 'center'
         }}>
           
           {/* Header */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '30px' }}>
-            <span style={{ fontSize: '2.5rem' }}>🍃</span>
-            <h2 style={{ fontSize: '1.6rem', color: 'var(--color-forest-dark)', fontWeight: '800', margin: 0 }}>লগইন করুন</h2>
-            <span style={{ fontSize: '0.88rem', color: 'var(--color-mud)', fontWeight: 'bold' }}>কাস্টমার লগইন</span>
+            <span style={{ fontSize: '2.5rem' }}>🛡️</span>
+            <h2 style={{ fontSize: '1.6rem', color: 'var(--color-forest-dark)', fontWeight: '800', margin: 0 }}>অ্যাডমিন লগইন</h2>
+            <span style={{ fontSize: '0.88rem', color: 'var(--color-honey-dark)', fontWeight: 'bold' }}>ম্যানেজমেন্ট পোর্টাল</span>
           </div>
 
           {/* Error Message */}
@@ -176,14 +159,14 @@ export const Login: React.FC = () => {
           {/* Login Form */}
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'left' }}>
             
-            {/* Phone Input */}
+            {/* Email */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.88rem', color: 'var(--color-mud)', fontWeight: 'bold', marginBottom: '6px' }}>মোবাইল নম্বর *</label>
+              <label style={{ display: 'block', fontSize: '0.88rem', color: 'var(--color-mud)', fontWeight: 'bold', marginBottom: '6px' }}>ইমেইল ঠিকানা *</label>
               <div style={{ position: 'relative' }}>
                 <input 
-                  type="text" 
-                  value={phoneInput}
-                  onChange={(e) => setPhoneInput(e.target.value)}
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 15px 10px 40px',
@@ -191,10 +174,10 @@ export const Login: React.FC = () => {
                     borderRadius: 'var(--border-radius-sm)',
                     fontSize: '0.95rem'
                   }}
-                  placeholder="যেমন: 017xxxxxxxx"
+                  placeholder="যেমন: admin@email.com"
                   disabled={loading}
                 />
-                <Phone size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'gray' }} />
+                <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'gray' }} />
               </div>
             </div>
 
@@ -235,22 +218,14 @@ export const Login: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                backgroundColor: 'var(--color-forest-dark)',
+                borderColor: 'var(--color-forest-dark)'
               }}
             >
-              {loading ? 'প্রবেশ করা হচ্ছে...' : 'লগইন করুন 🔑'}
+              {loading ? 'যাচাই করা হচ্ছে...' : 'অ্যাডমিন লগইন 🛡️'}
             </button>
           </form>
-
-          {/* Switch Register link */}
-          <div style={{ marginTop: '25px', fontSize: '0.88rem', color: 'gray' }}>
-            <p style={{ margin: 0 }}>
-              কোনো অ্যাকাউন্ট নেই?{' '}
-              <Link to="/register" style={{ color: 'var(--color-mangrove)', fontWeight: 'bold', textDecoration: 'underline' }}>
-                নতুন অ্যাকাউন্ট তৈরি করুন
-              </Link>
-            </p>
-          </div>
 
         </div>
 
