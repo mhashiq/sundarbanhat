@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MV88V9NC');</script>
+<!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পণ্যের বিবরণ - সুন্দরবন হাট</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 50px;
+            margin-top: 40px;
+        }
+        .gallery-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-img-holder {
+            background-color: var(--color-white);
+            border: 8px solid #5A4325;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px var(--color-shadow);
+        }
+        .main-img-holder img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        .meta-tags {
+            display: flex;
+            gap: 12px;
+            margin-bottom: var(--spacing-sm);
+        }
+        .meta-tags span {
+            background-color: var(--color-white);
+            padding: 4px 14px;
+            border-radius: var(--border-radius-full);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-forest);
+            border: 1px solid var(--color-border);
+        }
+        .product-title {
+            font-size: 2.8rem;
+            color: var(--color-mangrove-deep);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .product-subtitle {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-honey-glow);
+            margin-bottom: 20px;
+        }
+        .product-price-box {
+            background-color: var(--color-white);
+            border-left: 5px solid var(--color-honey);
+            padding: 15px 25px;
+            border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px var(--color-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .product-price-val {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--color-forest);
+        }
+        .product-weight-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: var(--color-sand-dark);
+            padding: 6px 14px;
+            border-radius: 4px;
+        }
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+        .story-block {
+            background: var(--color-white);
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            border-left: 4px solid var(--color-forest);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px var(--color-shadow);
+        }
+        .story-block h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--color-forest);
+        }
+        .tab-menu {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-charcoal-light);
+            cursor: pointer;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: var(--color-forest);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--color-forest);
+        }
+        .tab-content {
+            display: none;
+            font-size: 1rem;
+            color: var(--color-charcoal-light);
+            line-height: 1.7;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .related-products-section {
+            margin-top: 60px;
+            border-top: 1px solid var(--color-border);
+            padding-top: 40px;
+        }
+        
+        @media (max-width: 992px) {
+            .detail-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+        @media (max-width: 768px) {
+            .product-title {
+                font-size: 2.2rem;
+            }
+            .action-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো">
+                    সুন্দরবন হাট
+                </a>
+                <button class="mobile-menu-btn" aria-label="মেনু খুলুন">☰</button>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">হোম</a></li>
+                    <li><a href="products.html" class="nav-link active">পণ্যসমূহ</a></li>
+                    <li><a href="about.html" class="nav-link">আমাদের সম্পর্কে</a></li>
+                    <li><a href="why-us.html" class="nav-link">কেন আমরা</a></li>
+                    <li><a href="contact.html" class="nav-link">যোগাযোগ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title / Breadcrumbs -->
+    <section style="background-color: var(--color-sand-dark); padding: 25px 0;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="font-family: var(--font-heading); font-size: 0.95rem; color: var(--color-charcoal-light);">
+                <a href="index.html">হোম</a> ➔ <a href="products.html">পণ্যসমূহ</a> ➔ <span id="breadcrumb-current" style="font-weight: 700; color: var(--color-mangrove-deep);">পণ্যের বিবরণ</span>
+            </div>
+            <a href="products.html" class="btn btn-outline" style="padding: 6px 16px; font-size: 0.9rem;">🔙 সকল পণ্য</a>
+        </div>
+    </section>
+
+    <!-- Main Content Detail Layout -->
+    <section class="section">
+        <div class="container">
+            <div class="detail-layout" id="product-detail-container">
+                <!-- Left Gallery Panel -->
+                <div class="gallery-panel">
+                    <div class="main-img-holder">
+                        <img src="comingsoon.png" alt="Product Image" id="prod-img">
+                    </div>
+                    
+                    <div class="modal-authenticity-card">
+                        <h4 style="color: var(--color-forest); margin-bottom: 6px;">🛡️ সার্টিফিকেট অফ অথেনটিসিটি</h4>
+                        <p style="font-size: 0.85rem; color: var(--color-charcoal-light);">আমরা সরাসরি সাতক্ষীরার প্রান্তিক সংগ্রহকারী, জেলে ও চাষীদের থেকে পণ্য কিনি, কোনো থার্ড-পার্টি জড়িত নয়।</p>
+                        <div style="font-weight: 700; color: var(--color-honey-glow); margin-top: 10px; font-size: 0.9rem;">✓ ১০০% খাঁটি, নিরাপদ ও রাসায়নিকমুক্ত</div>
+                    </div>
+                </div>
+
+                <!-- Right Info Panel -->
+                <div class="info-panel">
+                    <div class="meta-tags">
+                        <span id="prod-location">📍 শ্যামনগর, সাতক্ষীরা</span>
+                        <span id="prod-harvest">📅 সংগ্রহ: মে ২০২৬</span>
+                    </div>
+                    
+                    <h1 class="product-title" id="prod-title">সুন্দরবনের খাঁটি মধু</h1>
+                    <div class="product-subtitle" id="prod-subcategory">সুন্দরবনের খাঁটি মধু</div>
+                    
+                    <div class="product-price-box">
+                        <div class="crate-price-wrapper">
+                            <span class="crate-price-label">মূল্য</span>
+                            <span class="product-price-val" id="prod-price">৳৮৫০</span>
+                        </div>
+                        <span class="product-weight-val" id="prod-weight">৫০০ গ্রাম</span>
+                    </div>
+
+                    <div class="action-row">
+                        <a href="tel:+8801873520181" class="btn btn-primary" style="font-size: 1.1rem;">📞 ফোনে অর্ডার করুন</a>
+                        <a href="https://wa.me/8801873520181" target="_blank" class="btn btn-whatsapp" style="font-size: 1.1rem;">💬 WhatsApp এ অর্ডার</a>
+                    </div>
+
+                    <div class="story-block">
+                        <h3>🌿 পণ্যের গল্প ও কারুশিল্প</h3>
+                        <p id="prod-story">প্রতিটি পণ্যই সুন্দরবনের প্রকৃতি এবং উপকূলের মানুষের জীবন সংগ্রামের অংশ।</p>
+                    </div>
+
+                    <!-- Tabbing for additional details -->
+                    <div>
+                        <div class="tab-menu">
+                            <button class="tab-btn active" data-tab="nutri">পুষ্টি ও উপকারিতা</button>
+                            <button class="tab-btn" data-tab="storage">সংরক্ষণ পদ্ধতি</button>
+                            <button class="tab-btn" data-tab="shipping">ডেলিভারি পলিসি</button>
+                        </div>
+                        
+                        <!-- Tab Content 1 -->
+                        <div class="tab-content active" id="tab-nutri">
+                            <ul style="list-style: disc; padding-left: 20px;" id="prod-benefits">
+                                <li>১০০% অর্গানিক এবং প্রাকৃতিকভাবে পুষ্টিকর।</li>
+                                <li>রোগ প্রতিরোধ ক্ষমতা বাড়াতে সাহায্য করে।</li>
+                                <li>যেকোনো ধরনের কৃত্রিম রাসায়নিক বা প্রিজারভেটিভ মুক্ত।</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Tab Content 2 -->
+                        <div class="tab-content" id="tab-storage">
+                            <p id="prod-storage">আর্দ্রতাহুক্ত, শুষ্ক ও সরাসরি সূর্যের আলো থেকে দূরে কোনো ঠাণ্ডা স্থানে বোতল ভালো করে আটকে সংরক্ষণ করুন। ফ্রিজে রাখার প্রয়োজন নেই।</p>
+                        </div>
+                        
+                        <!-- Tab Content 3 -->
+                        <div class="tab-content" id="tab-shipping">
+                            <p>সারা বাংলাদেশে সুন্দরবন কুরিয়ার, এসএ পরিবহন অথবা হোম ডেলিভারির মাধ্যমে ২-৫ দিনের মধ্যে পৌঁছে দেওয়া হয়। মাছ বা তাজা পণ্যগুলোর ক্ষেত্রে আমরা বরফ দিয়ে বিশেষ কর্কশিট বক্সে প্যাকিং করি যাতে পণ্যের সতেজতা বজায় থাকে।</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="related-products-section">
+                <h2 style="font-size: 2rem; margin-bottom: 30px; text-align: center; color: var(--color-mangrove-deep);">সংশ্লিষ্ট অন্যান্য পণ্য</h2>
+                <div class="products-showcase-grid" id="related-grid">
+                    <!-- Loaded via javascript based on category -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো">
+                        সুন্দরবন হাট
+                    </div>
+                    <p class="footer-about">শ্যামনগর, সাতক্ষীরা থেকে সরাসরি সংগৃহীত নিরাপদ ও ভেজালমুক্ত প্রাকৃতিক খাদ্যপণ্য আপনার ঘরে পৌঁছে দিতে প্রতিশ্রুতিবদ্ধ একটি উপকূলীয় উদ্যোগ।</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">প্রয়োজনীয় লিংক</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">হোম</a></li>
+                        <li><a href="products.html">পণ্যসমূহ</a></li>
+                        <li><a href="about.html">আমাদের সম্পর্কে</a></li>
+                        <li><a href="why-us.html">কেন আমরা</a></li>
+                        <li><a href="faq.html">জিজ্ঞাসা ও ব্লগ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3 class="footer-title">পলিসি ও নীতিসমূহ</h3>
+                    <ul class="footer-links">
+                        <li><a href="delivery-policy.html">ডেলিভারি নীতি</a></li>
+                        <li><a href="return-policy.html">রিটার্ন ও রিফান্ড নীতি</a></li>
+                        <li><a href="privacy-policy.html">গোপনীয়তা নীতি</a></li>
+                        <li><a href="terms.html">শর্তাবলী ও নিয়মসমূহ</a></li>
+                        <li><a href="contact.html">যোগাযোগ</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                &copy; ২০২৬ সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত। Managed by <a href="https://www.authbrain.io" target="_blank">AuthBrain</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation sticky -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="bottom-nav-link">
+            <span class="icon">🏠</span>
+            <span>হোম</span>
+        </a>
+        <a href="products.html" class="bottom-nav-link active">
+            <span class="icon">🛒</span>
+            <span>পণ্য</span>
+        </a>
+        <a href="tel:+8801873520181">
+            <span class="icon">📞</span>
+            <span>কল করুন</span>
+        </a>
+        <a href="https://wa.me/8801873520181" target="_blank">
+            <span class="icon">💬</span>
+            <span>WhatsApp</span>
+        </a>
+    </nav>
+
+    <!-- Floating Translator Widget -->
+    <div class="translator-widget">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab Menu logic
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
+
+            // Parse URL parameters and load corresponding product detail
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id') || 'honey-kholisha';
+            
+            if (window.PRODUCT_DB && window.PRODUCT_DB[productId]) {
+                const product = window.PRODUCT_DB[productId];
+                
+                document.getElementById('breadcrumb-current').textContent = product.title;
+                document.getElementById('prod-title').textContent = product.title;
+                document.getElementById('prod-subcategory').textContent = product.subcategory;
+                document.getElementById('prod-price').textContent = product.price;
+                document.getElementById('prod-weight').textContent = product.weight;
+                document.getElementById('prod-location').textContent = `📍 ${product.location}`;
+                document.getElementById('prod-harvest').textContent = `📅 সংগ্রহ: ${product.harvest}`;
+                document.getElementById('prod-story').textContent = product.story;
+                document.getElementById('prod-img').src = product.img;
+                document.getElementById('prod-img').alt = product.title;
+                
+                if (product.storage) {
+                    document.getElementById('prod-storage').textContent = product.storage;
+                }
+
+                // Render benefits list
+                const benefitsContainer = document.getElementById('prod-benefits');
+                benefitsContainer.innerHTML = '';
+                if (product.benefits && product.benefits.length > 0) {
+                    product.benefits.forEach(b => {
+                        const li = document.createElement('li');
+                        li.textContent = b;
+                        benefitsContainer.appendChild(li);
+                    });
+                } else {
+                    benefitsContainer.innerHTML = '<li>১০০% খাঁটি ও গুণগত মান সম্পন্ন প্রাকৃতিক উপাদান।</li><li>সরাসরি উপকূলীয় খামার থেকে পরম যত্নে সংগৃহীত।</li>';
+                }
+
+                // Render related products (of same category)
+                const relatedGrid = document.getElementById('related-grid');
+                relatedGrid.innerHTML = '';
+                
+                let count = 0;
+                for (const key in window.PRODUCT_DB) {
+                    if (key !== productId && window.PRODUCT_DB[key].category === product.category && count < 3) {
+                        const rel = window.PRODUCT_DB[key];
+                        relatedGrid.innerHTML += `
+                            <div class="crate-product-card">
+                                <div class="crate-top-banner">
+                                    <span>CRATE #SH-${count + 9}</span>
+                                    <span style="color: #64dd17;">● উপলব্ধ</span>
+                                </div>
+                                <div class="crate-image-wrapper">
+                                    <img src="${rel.img}" alt="${rel.title}">
+                                </div>
+                                <div class="crate-body">
+                                    <h3 class="crate-title" style="font-size:1.15rem; margin-bottom:5px;">${rel.title}</h3>
+                                    <p class="crate-story" style="font-size:0.8rem; line-height:1.4; margin-bottom:10px;">${rel.story.substring(0, 70)}...</p>
+                                    <div class="crate-bottom" style="margin-bottom:10px;">
+                                        <span style="font-weight:bold; color:var(--color-forest);">${rel.price}</span>
+                                        <span style="font-size:0.8rem; background:var(--color-sand); padding:2px 6px; border-radius:4px;">${rel.weight}</span>
+                                    </div>
+                                    <a href="product-detail.html?id=${key}" class="btn btn-outline" style="padding: 8px 12px; width: 100%; font-size:0.85rem;">বিস্তারিত দেখুন</a>
+                                </div>
+                            </div>
+                        `;
+                        count++;
+                    }
+                }
+                
+                // If not enough related products of same category, load any
+                if (count < 3) {
+                    for (const key in window.PRODUCT_DB) {
+                        if (key !== productId && window.PRODUCT_DB[key].category !== product.category && count < 3) {
+                            const rel = window.PRODUCT_DB[key];
+                            relatedGrid.innerHTML += `
+                                <div class="crate-product-card">
+                                    <div class="crate-top-banner">
+                                        <span>CRATE #SH-${count + 9}</span>
+                                        <span style="color: #64dd17;">● উপলব্ধ</span>
+                                    </div>
+                                    <div class="crate-image-wrapper">
+                                        <img src="${rel.img}" alt="${rel.title}">
+                                    </div>
+                                    <div class="crate-body">
+                                        <h3 class="crate-title" style="font-size:1.15rem; margin-bottom:5px;">${rel.title}</h3>
+                                        <p class="crate-story" style="font-size:0.8rem; line-height:1.4; margin-bottom:10px;">${rel.story.substring(0, 70)}...</p>
+                                        <div class="crate-bottom" style="margin-bottom:10px;">
+                                            <span style="font-weight:bold; color:var(--color-forest);">${rel.price}</span>
+                                            <span style="font-size:0.8rem; background:var(--color-sand); padding:2px 6px; border-radius:4px;">${rel.weight}</span>
+                                        </div>
+                                        <a href="product-detail.html?id=${key}" class="btn btn-outline" style="padding: 8px 12px; width: 100%; font-size:0.85rem;">বিস্তারিত দেখুন</a>
+                                    </div>
+                                </div>
+                            `;
+                            count++;
+                        }
+                    }
+                }
+            } else {
+                document.getElementById('product-detail-container').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
+                        <h2>দুঃখিত! পণ্যটি পাওয়া যায়নি।</h2>
+                        <p style="margin-top: 15px; margin-bottom: 25px;">আপনার খোঁজা পণ্যটি আমাদের তালিকায় নেই অথবা এটি সাময়িকভাবে স্টক আউট হয়েছে।</p>
+                        <a href="products.html" class="btn btn-primary">সকল পণ্য দেখুন</a>
+                    </div>
+                `;
+            }
+        });
+    </script>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'bn'
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&hl=en"></script>
+</body>
+</html>

@@ -1,43 +1,122 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MV88V9NC');</script>
+<!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>আমাদের সম্পর্কে - সুন্দরবন হাট</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        .story-section {
-            display: flex;
-            gap: 40px;
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 50px;
             align-items: center;
             margin-bottom: 60px;
         }
-        .story-section:nth-child(even) {
-            flex-direction: row-reverse;
+        .about-text h2 {
+            font-size: 2rem;
+            color: var(--color-forest);
+            margin-bottom: 20px;
         }
-        .story-content {
-            flex: 1;
+        .about-text p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            color: var(--color-charcoal-light);
+            line-height: 1.8;
         }
-        .story-image {
-            flex: 1;
+        .about-image {
+            background-color: var(--color-white);
+            border: 8px solid #5A4325;
             border-radius: var(--border-radius-lg);
             overflow: hidden;
-            box-shadow: 0 10px 30px var(--color-shadow);
+            box-shadow: 0 15px 35px var(--color-shadow);
+        }
+        .about-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: var(--transition-smooth);
+        }
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+        .team-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .team-card {
+            background: var(--color-white);
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 10px 25px var(--color-shadow);
+            border: 1px solid var(--color-border);
+        }
+        .team-avatar {
+            width: 90px;
+            height: 90px;
+            background-color: var(--color-forest);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            border: 4px solid var(--color-honey);
+        }
+        .team-name {
+            font-size: 1.25rem;
+            color: var(--color-mangrove-deep);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .team-role {
+            font-size: 0.9rem;
+            color: var(--color-honey-glow);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 992px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         @media (max-width: 768px) {
-            .story-section, .story-section:nth-child(even) {
-                flex-direction: column;
+            .team-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
+
     <!-- Header & Navigation -->
     <header class="header">
         <div class="container">
             <nav class="navbar">
                 <a href="index.html" class="nav-brand">
-                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 50px; width: auto; border-radius: 0 !important;">
+                    <img src="logo.jpg" alt="সুন্দরবন হাট লোগো">
                     সুন্দরবন হাট
                 </a>
                 <button class="mobile-menu-btn" aria-label="মেনু খুলুন">☰</button>
@@ -52,70 +131,68 @@
         </div>
     </header>
 
-    <!-- Page Title -->
-    <section style="background-color: var(--color-background); padding: 60px 0; text-align: center;">
+    <!-- Page Title Banner -->
+    <section style="background-color: var(--color-sand-dark); padding: 50px 0; text-align: center;">
         <div class="container">
-            <h1 style="font-size: 2.5rem;">সুন্দরবনের গল্প</h1>
-            <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">প্রকৃতির অপরূপ উপহার, সুন্দরবন থেকে সংগৃহীত খাঁটি পণ্যের পেছনের গল্প।</p>
+            <h1 style="font-size: 2.8rem; color: var(--color-mangrove-deep);">আমাদের সম্পর্কে</h1>
+            <p style="font-size: 1.2rem; color: var(--color-charcoal-light); margin-top: 10px;">সুন্দরবনের কোল ঘেঁষে গড়ে ওঠা এক সততা ও সতেজ খাবারের সফল গল্প।</p>
         </div>
     </section>
 
-    <!-- Story Content -->
-    <section class="section">
+    <!-- About Section Content -->
+    <section class="section" style="background-color: var(--color-sand);">
         <div class="container">
-            
-            <div class="story-section">
-                <div class="story-content">
-                    <h2 style="color: var(--color-secondary);">সুন্দরবনের ইতিহাস ও ঐতিহ্য</h2>
-                    <p style="margin-bottom: 15px;">বিশ্বের সর্ববৃহৎ ম্যানগ্রোভ বন সুন্দরবন শুধু জীববৈচিত্র্যের জন্যই নয়, বরং এখানকার প্রাকৃতিক সম্পদের জন্যও বিখ্যাত। যুগ যুগ ধরে এই অঞ্চলের মানুষ প্রকৃতির সাথে লড়াই করে তাদের জীবিকা নির্বাহ করে আসছে।</p>
-                    <p>আমাদের 'সুন্দরবন হাট' এর মূল লক্ষ্য হলো এই প্রাকৃতিক ঐশ্বর্যকে দেশের প্রতিটি প্রান্তে পৌঁছে দেওয়া। আমরা শ্যামনগর, সাতক্ষীরা কেন্দ্রিক একটি উদ্যোগ, যারা সরাসরি সুন্দরবন এবং এর আশেপাশের অঞ্চল থেকে পণ্য সংগ্রহ করে থাকি।</p>
+            <!-- Part 1 -->
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>আমাদের স্বপ্ন ও শুরু</h2>
+                    <p>সুন্দরবন অঞ্চলের শ্যামনগর (সাতক্ষীরা) বাংলাদেশের অন্যতম প্রাকৃতিক সম্পদের ভাণ্ডার। এই অঞ্চলে রয়েছে খাঁটি মৌচাকের মধু, লবণাক্ত জলের সুস্বাদু চিংড়ি এবং নদী ও সাগরের অসাধারণ সতেজ মাছ। তবে ভৌগোলিক বিচ্ছিন্নতা এবং মধ্যস্বত্বভোগীদের আধিপত্যের কারণে শহরের সাধারণ মানুষ যেমন খাঁটি পণ্য থেকে বঞ্চিত হচ্ছিল, তেমনি প্রান্তিক সংগ্রাহক ও চাষীরাও পাচ্ছিলেন না তাদের শ্রমের ন্যায্য মূল্য।</p>
+                    <p>এই শূন্যতা পূরণের উদ্দেশ্যেই ২০২৬ সালে যাত্রা শুরু করে **সুন্দরবন হাট**। আমরা একটি সরাসরি উপকূলীয় উদ্যোগ, যা সাতক্ষীরার শ্যামনগরে প্রতিষ্ঠিত। আমরা কোনো পাইকারি বাজার বা থার্ড-পার্টি থেকে পণ্য কিনি না; বরং বনের প্রান্তিক মৌয়াল, জেলে ও কৃষকদের সাথে সরাসরি কাজ করি।</p>
                 </div>
-                <div class="story-image">
-                    <img src="https://placehold.co/600x400/1B5E20/FFFFFF?text=সুন্দরবনের+দৃশ্য" alt="সুন্দরবনের দৃশ্য">
-                </div>
-            </div>
-
-            <div class="story-section">
-                <div class="story-content">
-                    <h2 style="color: var(--color-secondary);">মৌয়ালদের জীবন ও মধু সংগ্রহ</h2>
-                    <p style="margin-bottom: 15px;">সুন্দরবনের মধু বিশ্ববিখ্যাত। এপ্রিল থেকে জুন মাস পর্যন্ত মৌয়ালরা জীবনের ঝুঁকি নিয়ে গহীন বনে প্রবেশ করে মধু সংগ্রহ করেন। গরান, খলিশা ও কেওড়া ফুলের এই মধু স্বাদে ও গুণে অতুলনীয়।</p>
-                    <p>আমরা সরাসরি এই সাহসী মৌয়ালদের কাছ থেকে মধু সংগ্রহ করি, যার ফলে আপনারা পান ১০০% খাঁটি কাঁচা মধু এবং মৌয়ালরাও পান তাদের নায্য মূল্য।</p>
-                </div>
-                <div class="story-image">
-                    <img src="https://placehold.co/600x400/F9A825/FFFFFF?text=মধু+সংগ্রহ" alt="মধু সংগ্রহ">
+                <div class="about-image">
+                    <img src="sundarbanboat.jpg" alt="সুন্দরবন নদী ও কাঠের নৌকা">
                 </div>
             </div>
 
-            <div class="story-section">
-                <div class="story-content">
-                    <h2 style="color: var(--color-secondary);">স্থানীয় কৃষকদের গল্প</h2>
-                    <p style="margin-bottom: 15px;">দক্ষিণাঞ্চলের মাটি ও জলবায়ু নির্দিষ্ট কিছু ফসলের জন্য আশীর্বাদস্বরূপ। আমাদের সরিষার তেল, হলুদের গুঁড়া এবং দেশি গুড় তৈরি হয় স্থানীয় কৃষকদের পরম যতন ও ভালোবাসায়।</p>
-                    <p>রাসায়নিক সার ও কীটনাশকমুক্ত উপায়ে উৎপাদিত এই পণ্যগুলো কাঠের ঘানিতে ভাঙানো বা রোদে শুকিয়ে প্রক্রিয়াজাত করা হয়, যাতে এর প্রাকৃতিক গুণাগুণ অটুট থাকে।</p>
+            <!-- Part 2 -->
+            <div class="about-grid" style="direction: rtl;">
+                <div class="about-text" style="direction: ltr; text-align: left;">
+                    <h2>ন্যায্য ও টেকসই বাণিজ্য</h2>
+                    <p>সুন্দরবন হাটের প্রতিটি কেনাকাটার পেছনে জড়িয়ে আছে একজন মৌয়ালের প্রাণের ঝুঁকি কিংবা একজন জেলের জোয়ার-ভাটার হাড়ভাঙা খাটুনি। আমরা বনের সংগ্রাহকদের সরাসরি উপযুক্ত মূল্য পরিশোধ করি। এর ফলে তাদের জীবনমানের উন্নয়ন ঘটছে এবং তারা প্রকৃতিকে ভালোবাসতে ও ম্যানগ্রোভ বনের জীববৈচিত্র্য রক্ষা করতে উদ্বুদ্ধ হচ্ছেন।</p>
+                    <p>আমাদের স্লোগান হলো—**"সুন্দরবনের খাঁটি স্বাদ, সরাসরি আপনার ঘরে"**। আমরা বিশ্বাস করি, খাদ্য মানুষের শরীরের পুষ্টি জোগায়, আর খাঁটি খাদ্য মনে এনে দেয় পরম তৃপ্তি। সেই তৃপ্তি আর বিশ্বাসের সম্পর্ক তৈরিতে আমরা নিরলস কাজ করে যাচ্ছি।</p>
                 </div>
-                <div class="story-image">
-                    <img src="https://placehold.co/600x400/8D6E63/FFFFFF?text=কৃষক" alt="কৃষক">
+                <div class="about-image" style="direction: ltr;">
+                    <img src="prawn.jpg" alt="তাজা চিংড়ি সংগ্রহ">
                 </div>
             </div>
 
-        </div>
-    </section>
-
-    <!-- Video Gallery Placeholder -->
-    <section class="section" style="background-color: var(--color-background);">
-        <div class="container">
-            <h2 class="section-title">ভিডিও গ্যালারি</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px;">
-                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
-                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ মধু সংগ্রহের ভিডিও</div>
-                    <h4 style="margin-top: 15px; text-align: center;">কীভাবে আমরা মধু সংগ্রহ করি</h4>
-                </div>
-                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
-                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ ঘানিতে সরিষা ভাঙানোর ভিডিও</div>
-                    <h4 style="margin-top: 15px; text-align: center;">কাঠের ঘানির সরিষার তেল</h4>
-                </div>
-                <div style="background: white; padding: 10px; border-radius: var(--border-radius-md); box-shadow: 0 4px 10px var(--color-shadow);">
-                    <div style="background: #000; height: 200px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: white;">▶ মাছ ধরার ভিডিও</div>
-                    <h4 style="margin-top: 15px; text-align: center;">দক্ষিণাঞ্চলের তাজা মাছ</h4>
+            <!-- Team Section -->
+            <div class="team-section">
+                <span class="section-subtitle">উদ্যোক্তাবৃন্দ</span>
+                <h2 class="section-title">সুন্দরবন হাটের নেপথ্যের কারিগর</h2>
+                
+                <div class="team-grid">
+                    <!-- Member 1 -->
+                    <div class="team-card">
+                        <div class="team-avatar">মৌ</div>
+                        <h3 class="team-name">স্থানীয় মৌয়াল ও জেলে সমবায়</h3>
+                        <div class="team-role">মূল সংগ্রাহক ও অংশীদার</div>
+                        <p style="font-size:0.95rem; color:var(--color-charcoal-light);">সুন্দরবনের গভীর অরণ্য ও উপকূলের লোনা পানি থেকে সরাসরি মধু ও চিংড়ি আহরণকারী প্রান্তিক বীরগণ।</p>
+                    </div>
+                    <!-- Member 2 -->
+                    <div class="team-card">
+                        <div class="team-avatar">প্যা</div>
+                        <h3 class="team-name">শ্যামনগর প্যাকেজিং টিম</h3>
+                        <div class="team-role">কোয়ালিটি ও প্যাকিং হাব</div>
+                        <p style="font-size:0.95rem; color:var(--color-charcoal-light);">সংগৃহীত পণ্যগুলো ফুড-গ্রেড জারে অত্যন্ত পরিচ্ছন্ন ও মানসম্মত উপায়ে প্যাকেজিং নিশ্চিত করেন যারা।</p>
+                    </div>
+                    <!-- Member 3 -->
+                    <div class="team-card">
+                        <div class="team-avatar">অ</div>
+                        <h3 class="team-name">AuthBrain</h3>
+                        <div class="team-role">আইটি ও ডিস্ট্রিবিউশন পার্টনার</div>
+                        <p style="font-size:0.95rem; color:var(--color-charcoal-light);">ডিজিটাল ডোমেইন, কাস্টমার সার্ভিস ও লজিস্টিক ম্যানেজমেন্ট পরিচালনায় আমাদের কারিগরি সহযোগী।</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,44 +203,43 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <div class="nav-brand" style="color: white; margin-bottom: 20px;">
-                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো" style="height: 60px; width: auto; border-radius: 0 !important;">
+                    <div class="footer-logo">
+                        <img src="logo.jpg" alt="সুন্দরবন হাট লোগো">
                         সুন্দরবন হাট
                     </div>
-                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">সুন্দরবনের খাঁটি খাবার, সরাসরি আপনার ঘরে। শ্যামনগর, সাতক্ষীরা থেকে নিরাপদ ও প্রাকৃতিক খাদ্যপণ্য।</p>
+                    <p class="footer-about">শ্যামনগর, সাতক্ষীরা থেকে সরাসরি সংগৃহীত নিরাপদ ও ভেজালমুক্ত প্রাকৃতিক খাদ্যপণ্য আপনার ঘরে পৌঁছে দিতে প্রতিশ্রুতিবদ্ধ একটি উপকূলীয় উদ্যোগ।</p>
                 </div>
+                
                 <div class="footer-col">
-                    <h3 style="margin-bottom: 20px;">গুরুত্বপূর্ণ লিংক</h3>
-                    <ul>
+                    <h3 class="footer-title">প্রয়োজনীয় লিংক</h3>
+                    <ul class="footer-links">
                         <li><a href="index.html">হোম</a></li>
-                        <li><a href="products.html">আমাদের পণ্যসমূহ</a></li>
+                        <li><a href="products.html">পণ্যসমূহ</a></li>
                         <li><a href="about.html">আমাদের সম্পর্কে</a></li>
                         <li><a href="why-us.html">কেন আমরা</a></li>
+                        <li><a href="faq.html">জিজ্ঞাসা ও ব্লগ</a></li>
                     </ul>
                 </div>
+
                 <div class="footer-col">
-                    <h3 style="margin-bottom: 20px;">যোগাযোগ</h3>
-                    <ul style="color: rgba(255,255,255,0.8);">
-                        <li>ফোন: <a href="tel:+8801873520181" style="color: var(--color-secondary);">01873-520181</a></li>
-                        <li>WhatsApp: <a href="https://wa.me/8801873520181" target="_blank" style="color: var(--color-secondary);">01873-520181</a></li>
-                        <li>ঠিকানা: শ্যামনগর, সাতক্ষীরা, বাংলাদেশ</li>
-                        <li style="margin-top: 10px;"><a href="https://facebook.com" target="_blank" style="color: var(--color-secondary); font-weight: bold;">Facebook Page</a></li>
+                    <h3 class="footer-title">পলিসি ও নীতিসমূহ</h3>
+                    <ul class="footer-links">
+                        <li><a href="delivery-policy.html">ডেলিভারি নীতি</a></li>
+                        <li><a href="return-policy.html">রিটার্ন ও রিফান্ড নীতি</a></li>
+                        <li><a href="privacy-policy.html">গোপনীয়তা নীতি</a></li>
+                        <li><a href="terms.html">শর্তাবলী ও নিয়মসমূহ</a></li>
+                        <li><a href="contact.html">যোগাযোগ</a></li>
                     </ul>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                &copy; 2026 সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত। Managed by <a href="https://www.authbrain.io" target="_blank" style="color: var(--color-secondary); font-weight: bold;">AuthBrain</a>
+                &copy; ২০২৬ সুন্দরবন হাট। সর্বস্বত্ব সংরক্ষিত। Managed by <a href="https://www.authbrain.io" target="_blank">AuthBrain</a>
             </div>
         </div>
     </footer>
 
-    <!-- Floating Actions -->
-    <div class="floating-actions">
-        <a href="tel:+8801873520181" class="float-btn call-float" title="কল করুন">📞</a>
-        <a href="https://wa.me/8801873520181" target="_blank" class="float-btn whatsapp-float" title="WhatsApp">💬</a>
-    </div>
-
-    <!-- Mobile Bottom Navigation -->
+    <!-- Mobile Bottom Navigation sticky -->
     <nav class="mobile-bottom-nav">
         <a href="index.html" class="bottom-nav-link">
             <span class="icon">🏠</span>
@@ -188,10 +264,12 @@
         <div id="google_translate_element"></div>
     </div>
 
+    <!-- Scripts -->
     <script src="assets/js/main.js"></script>
 
     <!-- Google Translate Script -->
     <script type="text/javascript">
+        // Init translate
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'bn'
