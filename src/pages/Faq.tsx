@@ -1,21 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { getFaqs } from '../data/db';
-import type { Faq } from '../data/db';
+import { dataService } from '../services/dataService';
+import type { Faq } from '../services/dataService';
+import { Helmet } from 'react-helmet-async';
 
 export const FaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
 
   useEffect(() => {
-    getFaqs().then(setFaqs);
+    dataService.getFaqs().then(setFaqs);
   }, []);
 
   const toggleFaq = (id: string) => {
     setActiveFaq(activeFaq === id ? null : id);
   };
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <>
+      <Helmet>
+        <title>জিজ্ঞাসা ও ব্লগ - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের পণ্য সংগ্রহ পদ্ধতি, চিংড়ির কোল্ড চেইন প্যাকেজিং, এবং খাঁটি মধু সম্পর্কিত জিজ্ঞাসার উত্তর ও তথ্যসমৃদ্ধ প্রবন্ধসমূহ।" />
+        <meta name="keywords" content="সুন্দরবন হাট প্রশ্ন, মধু খাঁটি পরীক্ষা, চিংড়ি সংরক্ষণ, মৌয়ালদের গল্প" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/faq" />
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+      </Helmet>
+
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">
           <h1 style={{ fontSize: '2.6rem', color: 'var(--color-forest-dark)' }}>জিজ্ঞাসা ও ব্লগ</h1>

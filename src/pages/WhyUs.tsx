@@ -1,8 +1,15 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export const WhyUs: React.FC = () => {
   return (
     <>
+      <Helmet>
+        <title>কেন আমরা - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের বিশেষত্ব - সরাসরি সুন্দরবন থেকে মৌয়ালদের মাধ্যমে খলিশা মধু ও উপকূলীয় ঘেরের চিংড়ি সরাসরি আপনার ঘরে পৌঁছে দেয়ার বিস্তারিত বিবরণ।" />
+        <meta name="keywords" content="সুন্দরবন হাট কেন, খাঁটি মধুর নিশ্চয়তা, কোল্ড প্যাকেজিং" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/why-us" />
+      </Helmet>
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">
           <h1 style={{ fontSize: '2.6rem', color: 'var(--color-forest-dark)' }}>কেন আমরা সেরা?</h1>

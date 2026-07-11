@@ -1,8 +1,15 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export const Contact: React.FC = () => {
   return (
     <>
+      <Helmet>
+        <title>যোগাযোগ - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের সাথে সরাসরি যোগাযোগ করুন। মোবাইল নম্বর: ০১৮৭৩-৫২০১৮১, উপজেলা মোড়, শ্যামনগর, সাতক্ষীরা শাখা অফিস।" />
+        <meta name="keywords" content="সুন্দরবন হাট ঠিকানা, সুন্দরবন হাট ফোন নাম্বার, শ্যামনগর সাতক্ষীরা অফিস" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/contact" />
+      </Helmet>
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">
           <h1 style={{ fontSize: '2.6rem', color: 'var(--color-forest-dark)' }}>আমাদের সাথে যোগাযোগ</h1>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts } from '../data/db';
-import type { Product } from '../data/db';
+import { dataService, getImageUrl } from '../services/dataService';
+import type { Product } from '../services/dataService';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -10,7 +11,7 @@ export const Products: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    getProducts().then(prods => {
+    dataService.getProducts().then(prods => {
       setProducts(prods);
       setFilteredProducts(prods);
     });
@@ -37,6 +38,13 @@ export const Products: React.FC = () => {
 
   return (
     <>
+      <Helmet>
+        <title>পণ্যসমূহ - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের সেরা খাঁটি খাদ্যপণ্যসমূহ - খলিশা ফুলের কাঁচা মধু, লোনা পানির চিংড়ি, সরিষার তেল এবং দেশি আতপ চালের বিবরণ ও অর্ডার লিংক।" />
+        <meta name="keywords" content="সুন্দরবন হাট পণ্য, খাঁটি খলিশা মধু দাম, বাগদা চিংড়ি অর্ডার" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/products" />
+      </Helmet>
+
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">
           <h1 style={{ fontSize: '2.5rem', color: 'var(--color-forest-dark)' }}>আমাদের উপকূলীয় খাদ্যপণ্য</h1>
@@ -72,7 +80,7 @@ export const Products: React.FC = () => {
                   
                   <div className="crate-image-container">
                     <span className="crate-status-tag">{prod.subcategory}</span>
-                    <img src={prod.img} alt={prod.title} loading="lazy" />
+                    <img src={getImageUrl(prod.img)} alt={prod.title} loading="lazy" />
                   </div>
 
                   <div className="crate-body-content">
@@ -135,7 +143,7 @@ export const Products: React.FC = () => {
           >
             <div style={{ position: 'relative', width: '100%', height: '240px' }}>
               <img 
-                src={selectedProduct.img} 
+                src={getImageUrl(selectedProduct.img)} 
                 alt={selectedProduct.title} 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />

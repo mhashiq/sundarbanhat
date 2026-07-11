@@ -1,8 +1,15 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export const About: React.FC = () => {
   return (
     <>
+      <Helmet>
+        <title>আমাদের সম্পর্কে - সুন্দরবন হাট</title>
+        <meta name="description" content="সুন্দরবন হাটের সংগ্রহকারী মৌয়াল, জেলে ও উপকূলের স্থানীয় কৃষকদের জীবন মান উন্নয়ন ও খাঁটি খাবার সরবরাহের গল্প।" />
+        <meta name="keywords" content="সুন্দরবন হাট পরিচয়, সুন্দরবন মৌয়াল, শ্যামনগর সাতক্ষীরা" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/about" />
+      </Helmet>
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">
           <h1 style={{ fontSize: '2.6rem', color: 'var(--color-forest-dark)' }}>আমাদের সম্পর্কে</h1>

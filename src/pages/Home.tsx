@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts, getReviews, getFaqs } from '../data/db';
-import type { Product, Review, Faq } from '../data/db';
+import { dataService, getImageUrl } from '../services/dataService';
+import type { Product, Review, Faq } from '../services/dataService';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 
 export const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,12 +18,12 @@ export const Home: React.FC = () => {
 
   useEffect(() => {
     // Fetch DB records
-    getProducts().then(prods => {
+    dataService.getProducts().then(prods => {
       setProducts(prods);
       setFilteredProducts(prods);
     });
-    getReviews().then(setReviews);
-    getFaqs().then(setFaqs);
+    dataService.getReviews().then(setReviews);
+    dataService.getFaqs().then(setFaqs);
   }, []);
 
   // Stats count up simulation on mount
@@ -76,17 +77,21 @@ export const Home: React.FC = () => {
       }
     }))
   };
-
   return (
     <>
-      {/* Schema Injection */}
-      <script type="application/ld+json">
-        {JSON.stringify(faqSchema)}
-      </script>
+      <Helmet>
+        <title>সুন্দরবন হাট - সুন্দরবনের খাঁটি স্বাদ, সরাসরি আপনার ঘরে</title>
+        <meta name="description" content="সুন্দরবন হাট (Sundarban Hat) - শ্যামনগর, সাতক্ষীরা থেকে সরাসরি সংগৃহীত ১০০% খাঁটি খলিশা মধু, তাজা বাগদা চিংড়ি, কাঠের ঘানির সরিষার তেল এবং উপকূলীয় খাঁটি খাদ্যপণ্য।" />
+        <meta name="keywords" content="সুন্দরবন হাট, খলিশা মধু, সুন্দরবনের মধু, চিংড়ি, বাগদা চিংড়ি, ঘানির সরিষার তেল, সাতক্ষীরার আম, অর্গানিক ফুড, উপকূলীয় খাদ্য" />
+        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/" />
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+      </Helmet>
 
       {/* Hero Section */}
       <section className="hero-section">
-        <img src="/sundarbanboat.jpg" className="hero-bg" alt="সুন্দরবনের নদী ও নৌকা" />
+        <img src={getImageUrl('/sundarbanboat.jpg')} className="hero-bg" alt="সুন্দরবনের নদী ও নৌকা" />
         <div className="hero-overlay"></div>
         <div className="container hero-container">
           <motion.div
@@ -266,7 +271,7 @@ export const Home: React.FC = () => {
                   
                   <div className="crate-image-container">
                     <span className="crate-status-tag">{prod.subcategory}</span>
-                    <img src={prod.img} alt={prod.title} loading="lazy" />
+                    <img src={getImageUrl(prod.img)} alt={prod.title} loading="lazy" />
                   </div>
 
                   <div className="crate-body-content">
@@ -301,7 +306,7 @@ export const Home: React.FC = () => {
       <section className="section" style={{ padding: 0, position: 'relative' }}>
         <div style={{
           height: '450px',
-          backgroundImage: 'linear-gradient(rgba(7, 34, 17, 0.75), rgba(7, 34, 17, 0.85)), url("/sundarbanboat.jpg")',
+          backgroundImage: `linear-gradient(rgba(7, 34, 17, 0.75), rgba(7, 34, 17, 0.85)), url(${getImageUrl('/sundarbanboat.jpg')})`,
           backgroundAttachment: 'fixed',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

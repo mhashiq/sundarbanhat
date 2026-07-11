@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProductById, getProducts } from '../data/db';
-import type { Product } from '../data/db';
+import { dataService, getImageUrl } from '../services/dataService';
+import type { Product } from '../services/dataService';
+import { Helmet } from 'react-helmet-async';
 
 export const ProductDetails: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -12,11 +13,11 @@ export const ProductDetails: React.FC = () => {
   useEffect(() => {
     if (productId) {
       setLoading(true);
-      getProductById(productId).then(prod => {
+      dataService.getProductById(productId).then(prod => {
         if (prod) {
           setProduct(prod);
           // Fetch related products in same category (excluding current)
-          getProducts().then(allProds => {
+          dataService.getProducts().then(allProds => {
             const filtered = allProds.filter(p => p.category === prod.category && p.id !== prod.id);
             setRelatedProducts(filtered.slice(0, 3));
           });
@@ -44,13 +45,37 @@ export const ProductDetails: React.FC = () => {
     );
   }
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "image": `https://mhashiq.github.io/sundarbanhat${product.img}`,
+    "description": product.story,
+    "offers": {
+      "@type": "Offer",
+      "price": product.priceNum,
+      "priceCurrency": "BDT",
+      "availability": product.status === 'in-stock' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  };
+
   return (
     <section className="section" style={{ backgroundColor: 'var(--color-sand)', paddingTop: '30px' }}>
+      <Helmet>
+        <title>{product.title} - সুন্দরবন হাট</title>
+        <meta name="description" content={`${product.title} - ${product.story.substring(0, 150)}`} />
+        <meta name="keywords" content={`সুন্দরবন হাট, ${product.title}, ${product.subcategory}`} />
+        <link rel="canonical" href={`https://mhashiq.github.io/sundarbanhat/#/product/${product.id}`} />
+        <script type="application/ld+json">
+          {JSON.stringify(productSchema)}
+        </script>
+      </Helmet>
+
       <div className="container">
         
         {/* Documentary Style Top Banner */}
         <div className="details-hero-banner">
-          <img src={product.img} alt={product.title} className="details-hero-bg" />
+          <img src={getImageUrl(product.img)} alt={product.title} className="details-hero-bg" />
           <div className="details-hero-overlay"></div>
           <div className="details-hero-title-box">
             <span style={{ backgroundColor: 'var(--color-honey)', color: 'var(--color-forest-dark)', padding: '4px 10px', fontSize: '0.85rem', fontWeight: 'bold', borderRadius: '4px' }}>
@@ -68,7 +93,7 @@ export const ProductDetails: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             {/* Visual Box */}
             <div style={{ background: 'var(--color-white)', border: '6px double var(--color-mud)', padding: '20px', borderRadius: '4px', textAlign: 'center' }}>
-              <img src={product.img} alt={product.title} style={{ width: '100%', maxHeight: '350px', objectFit: 'contain', borderRadius: '4px' }} />
+              <img src={getImageUrl(product.img)} alt={product.title} style={{ width: '100%', maxHeight: '350px', objectFit: 'contain', borderRadius: '4px' }} />
               <div style={{ marginTop: '15px', fontStyle: 'italic', fontSize: '0.85rem', color: 'gray' }}>
                 📸 শ্যামনগর হাব থেকে সরাসরি তোলা পণ্যের বাস্তব ছবি।
               </div>
@@ -186,7 +211,7 @@ export const ProductDetails: React.FC = () => {
                   
                   <div className="crate-image-container">
                     <span className="crate-status-tag">{prod.subcategory}</span>
-                    <img src={prod.img} alt={prod.title} />
+                    <img src={getImageUrl(prod.img)} alt={prod.title} />
                   </div>
 
                   <div className="crate-body-content">

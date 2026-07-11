@@ -1,4 +1,4 @@
-import productsData from './products.json';
+import productsData from '../data/products.json';
 
 export interface Product {
   id: string;
@@ -32,7 +32,6 @@ export interface Faq {
   answer: string;
 }
 
-// Local mock databases
 const reviews: Review[] = [
   {
     id: "rev-1",
@@ -40,7 +39,7 @@ const reviews: Review[] = [
     location: "উত্তরা, ঢাকা",
     avatar: "রা",
     rating: 5,
-    text: "সুন্দরবন হাটের খলিশা ফুলের মধু চমৎকার! আসল সুন্দরবনের মধুর যে সুগন্ধ আর মৃদু টক স্বাদ থাকে, তা এটার মধ্যে পুরোপুরি আছে। প্যাকেজিংও অসম্ভব ভালো ছিল।"
+    text: "সুন্দরবন হাটের খলিশা ফুলের মধু চমৎকার! আসল सुंदरবনের মধুর যে সুগন্ধ আর মৃদু টক স্বাদ থাকে, তা এটার মধ্যে পুরোপুরি আছে। প্যাকেজিংও অসম্ভব ভালো ছিল।"
   },
   {
     id: "rev-2",
@@ -56,7 +55,7 @@ const reviews: Review[] = [
     location: "সিলেট জিন্দাবাজার",
     avatar: "স",
     rating: 5,
-    text: "ঘানির সরিষার তেল অর্ডার করেছিলাম। বোতলের ছিপি খুলতেই ঝাঁঝালো সুন্দর ঘ্রাণ বের হয়েছে। রান্নাতেও খুব ভালো স্বাদ এসেছে। ওদের ব্যবহারও খুব আন্তরিক।"
+    text: "ঘানির সরিষার তেল অর্ডার করেছিলাম। বোতলের ছিপি খুলতেই ঝাঁঝালো সুন্দর ঘ্রাণ বের হয়েছে। রান্নাতেও খুব ভালো স্বাদ এসেছে। ওনাদের ব্যবহারও খুব আন্তরিক।"
   },
   {
     id: "rev-4",
@@ -91,25 +90,31 @@ const faqs: Faq[] = [
   }
 ];
 
-// Asynchronous Data layer APIs (designed to resemble DB queries)
-export async function getProducts(): Promise<Product[]> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return productsData as Product[];
-}
+// unified service API
+export const dataService = {
+  async getProducts(): Promise<Product[]> {
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return productsData as Product[];
+  },
+  async getProductById(id: string): Promise<Product | undefined> {
+    await new Promise(resolve => setTimeout(resolve, 30));
+    const products = productsData as Product[];
+    return products.find(p => p.id === id);
+  },
+  async getReviews(): Promise<Review[]> {
+    await new Promise(resolve => setTimeout(resolve, 30));
+    return reviews;
+  },
+  async getFaqs(): Promise<Faq[]> {
+    await new Promise(resolve => setTimeout(resolve, 30));
+    return faqs;
+  }
+};
 
-export async function getProductById(id: string): Promise<Product | undefined> {
-  await new Promise(resolve => setTimeout(resolve, 50));
-  const products = productsData as Product[];
-  return products.find(p => p.id === id);
-}
+export const getImageUrl = (path: string): string => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${import.meta.env.BASE_URL}${cleanPath}`;
+};
 
-export async function getReviews(): Promise<Review[]> {
-  await new Promise(resolve => setTimeout(resolve, 50));
-  return reviews;
-}
-
-export async function getFaqs(): Promise<Faq[]> {
-  await new Promise(resolve => setTimeout(resolve, 50));
-  return faqs;
-}

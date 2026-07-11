@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
       <div className="container">
         <nav className="navbar">
           <Link to="/" className="nav-brand">
-            <img src="/logo.jpg" alt="সুন্দরবন হাট লোগো" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="সুন্দরবন হাট লোগো" />
             সুন্দরবন হাট
           </Link>
 

@@ -1,8 +1,26 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export const PolicyPage: React.FC = () => {
   const { policyType } = useParams<{ policyType: string }>();
+
+  const getPolicyMeta = () => {
+    switch (policyType) {
+      case 'delivery':
+        return { title: 'ডেলিভারি নীতি', desc: 'সুন্দরবন হাটের কুরিয়ার বুকিং, পেমেন্ট এবং কোল্ড চেইন ফ্রেশ চিংড়ি প্যাকেজিং এর নীতিসমূহ।' };
+      case 'return':
+        return { title: 'রিটার্ন ও রিফান্ড নীতি', desc: 'পণ্যের গুণগত মান ও সতেজতায় আপত্তি থাকলে ফেরত বা রিফান্ড পাওয়ার সহজ নিয়মাবলী।' };
+      case 'privacy':
+        return { title: 'গোপনীয়তা নীতি', desc: 'অর্ডার করার সময় আপনার সংগ্রহকৃত তথ্যের সম্পূর্ণ গোপনীয়তা এবং নিরাপত্তা নিশ্চয়তা।' };
+      case 'terms':
+        return { title: 'শর্তাবলী ও নিয়মসমূহ', desc: 'সুন্দরবন হাট থেকে পণ্য ক্রয়ের নিয়ম, মূল্য এবং স্টক প্রাপ্যতা সম্পর্কিত নির্দেশনাবলী।' };
+      default:
+        return { title: 'নীতিমালা', desc: 'সুন্দরবন হাটের গ্রাহক নীতিমালা পেজ।' };
+    }
+  };
+
+  const meta = getPolicyMeta();
 
   // Render correct policy text
   const renderPolicyContent = () => {
@@ -142,10 +160,17 @@ export const PolicyPage: React.FC = () => {
   };
 
   return (
-    <section className="section" style={{ backgroundColor: 'var(--color-sand)' }}>
-      <div className="container" style={{ maxWidth: '850px' }}>
-        {renderPolicyContent()}
-      </div>
-    </section>
+    <>
+      <Helmet>
+        <title>{meta.title} - সুন্দরবন হাট</title>
+        <meta name="description" content={meta.desc} />
+        <link rel="canonical" href={`https://mhashiq.github.io/sundarbanhat/#/policy/${policyType}`} />
+      </Helmet>
+      <section className="section" style={{ backgroundColor: 'var(--color-sand)' }}>
+        <div className="container" style={{ maxWidth: '850px' }}>
+          {renderPolicyContent()}
+        </div>
+      </section>
+    </>
   );
 };
