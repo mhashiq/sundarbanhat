@@ -3,19 +3,33 @@ import { useParams, Link } from 'react-router-dom';
 import { dataService, getImageUrl } from '../services/dataService';
 import type { Product } from '../services/dataService';
 import { Helmet } from 'react-helmet-async';
+import { useCart } from '../context/CartContext';
+import { Heart, ShoppingCart, MessageSquare, PhoneCall, Plus, Minus } from 'lucide-react';
+import { 
+  trackViewItem, 
+  trackLead 
+} from '../analytics/analytics';
 
 export const ProductDetails: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+
+  const { addToCart, wishlistItems, addToWishlist, removeFromWishlist } = useCart();
 
   useEffect(() => {
     if (productId) {
       setLoading(true);
+      setQuantity(1); // Reset qty on product change
       dataService.getProductById(productId).then(prod => {
         if (prod) {
           setProduct(prod);
+          
+          // 1. Track GA4 view_item event on load
+          trackViewItem(prod);
+
           // Fetch related products in same category (excluding current)
           dataService.getProducts().then(allProds => {
             const filtered = allProds.filter(p => p.category === prod.category && p.id !== prod.id);
@@ -44,6 +58,25 @@ export const ProductDetails: React.FC = () => {
       </div>
     );
   }
+
+  const isWishlisted = wishlistItems.some(p => p.id === product.id);
+
+  const handleWishlistToggle = () => {
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+      // trackAddToWishlist is fired inside context
+    }
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+  };
+
+  const handleLeadClick = (type: 'whatsapp' | 'call') => {
+    trackLead(type, product.id, product.title);
+  };
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -89,20 +122,45 @@ export const ProductDetails: React.FC = () => {
 
         {/* Dynamic Split Details Grid */}
         <div className="details-split-grid">
-          {/* Left Panel: Gallery & Quick ordering */}
+          {/* Left Panel: Gallery & ordering */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             {/* Visual Box */}
-            <div style={{ background: 'var(--color-white)', border: '6px double var(--color-mud)', padding: '20px', borderRadius: '4px', textAlign: 'center' }}>
+            <div style={{ background: 'var(--color-white)', border: '6px double var(--color-mud)', padding: '20px', borderRadius: '4px', textAlign: 'center', position: 'relative' }}>
               <img src={getImageUrl(product.img)} alt={product.title} style={{ width: '100%', maxHeight: '350px', objectFit: 'contain', borderRadius: '4px' }} />
+              
+              {/* Wishlist Heart */}
+              <button
+                onClick={handleWishlistToggle}
+                style={{
+                  position: 'absolute',
+                  top: '15px',
+                  right: '15px',
+                  background: 'rgba(252, 250, 245, 0.9)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '50%',
+                  width: '42px',
+                  height: '42px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  color: isWishlisted ? '#e53935' : 'gray'
+                }}
+                title={isWishlisted ? 'পছন্দের তালিকা থেকে বাদ দিন' : 'পছন্দের তালিকায় যোগ করুন'}
+              >
+                <Heart size={22} fill={isWishlisted ? '#e53935' : 'none'} />
+              </button>
+
               <div style={{ marginTop: '15px', fontStyle: 'italic', fontSize: '0.85rem', color: 'gray' }}>
                 📸 শ্যামনগর হাব থেকে সরাসরি তোলা পণ্যের বাস্তব ছবি।
               </div>
             </div>
 
-            {/* Quick Order details */}
+            {/* Complete Ordering System */}
             <div style={{ background: 'var(--color-white)', padding: '30px', borderRadius: 'var(--border-radius-lg)', border: '1px solid var(--color-border)', boxShadow: '0 10px 25px var(--color-shadow)' }}>
               <h3 style={{ color: 'var(--color-forest-dark)', marginBottom: '15px', borderBottom: '1px dashed var(--color-border)', paddingBottom: '8px' }}>
-                📞 সরাসরি অর্ডার করুন
+                🛒 অর্ডার বা ঝুড়িতে যোগ করুন
               </h3>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', background: 'var(--color-sand)', padding: '15px', borderRadius: 'var(--border-radius-md)' }}>
@@ -116,14 +174,82 @@ export const ProductDetails: React.FC = () => {
                 </div>
               </div>
 
+              {/* Quantity Selection */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid var(--color-border)', paddingBottom: '15px' }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--color-mud)' }}>পরিমাণ নির্বাচন</span>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '1.5px solid var(--color-border)',
+                  borderRadius: 'var(--border-radius-full)',
+                  padding: '4px 12px',
+                  backgroundColor: 'var(--color-sand)'
+                }}>
+                  <button 
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                  >
+                    <Minus size={16} style={{ color: 'var(--color-mud)' }} />
+                  </button>
+                  <span style={{ margin: '0 15px', fontSize: '1.05rem', fontWeight: 'bold' }}>{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(q => q + 1)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                  >
+                    <Plus size={16} style={{ color: 'var(--color-mud)' }} />
+                  </button>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href={`tel:+8801873520181`} className="btn btn-primary">
-                  📞 কল করে অর্ডার দিন
+                {/* 1. Add to Cart Option */}
+                <button 
+                  onClick={handleAddToCart}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    fontSize: '1.05rem'
+                  }}
+                >
+                  <ShoppingCart size={18} /> ঝুড়িতে যোগ করুন (৳{product.priceNum * quantity})
+                </button>
+
+                {/* Divider */}
+                <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0', color: 'gray', fontSize: '0.8rem' }}>
+                  <div style={{ flexGrow: 1, height: '1px', backgroundColor: 'var(--color-border)' }}></div>
+                  <span style={{ padding: '0 10px' }}>অথবা সরাসরি অর্ডার করুন</span>
+                  <div style={{ flexGrow: 1, height: '1px', backgroundColor: 'var(--color-border)' }}></div>
+                </div>
+
+                {/* 2. Direct Lead Call */}
+                <a 
+                  href={`tel:+8801873520181`} 
+                  onClick={() => handleLeadClick('call')}
+                  className="btn btn-outline"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <PhoneCall size={16} /> কল করে অর্ডার দিন
                 </a>
-                <a href={`https://wa.me/8801873520181?text=আমি ${product.title} (${product.weight}) নিতে চাই।`} target="_blank" rel="noreferrer" className="btn btn-whatsapp">
-                  💬 WhatsApp-এ মেসেজ দিন
+
+                {/* 3. Direct Lead WhatsApp */}
+                <a 
+                  href={`https://wa.me/8801873520181?text=আমি ${product.title} (${product.weight}) ${quantity}টি নিতে চাই।`} 
+                  onClick={() => handleLeadClick('whatsapp')}
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="btn btn-whatsapp"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <MessageSquare size={16} /> WhatsApp-এ মেসেজ দিন
                 </a>
               </div>
+              
               <p style={{ fontSize: '0.8rem', color: 'gray', textAlign: 'center', marginTop: '12px' }}>
                 * কোনো অগ্রিম পেমেন্টের প্রয়োজন নেই। সারা দেশে ক্যাশ অন ডেলিভারি সুবিধা।
               </p>
@@ -230,8 +356,14 @@ export const ProductDetails: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '15px' }}>
-                      <a href={`tel:+8801873520181`} className="btn btn-primary" style={{ padding: '8px', fontSize: '0.9rem' }}>📞 কল করুন</a>
-                      <Link to={`/product/${prod.id}`} className="btn btn-outline" style={{ padding: '8px', fontSize: '0.9rem' }}>বিস্তারিত</Link>
+                      <button 
+                        onClick={() => addToCart(prod, 1)}
+                        className="btn btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', fontSize: '0.9rem' }}
+                      >
+                        <ShoppingCart size={14} /> অর্ডার করুন
+                      </button>
+                      <Link to={`/product/${prod.id}`} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', fontSize: '0.9rem' }}>বিস্তারিত</Link>
                     </div>
                   </div>
                 </div>

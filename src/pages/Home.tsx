@@ -4,6 +4,9 @@ import { dataService, getImageUrl } from '../services/dataService';
 import type { Product, Review, Faq } from '../services/dataService';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
+import { useCart } from '../context/CartContext';
+import { Heart, ShoppingCart } from 'lucide-react';
+import { trackViewItemList, trackSelectItem } from '../analytics/analytics';
 
 export const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,8 +16,27 @@ export const Home: React.FC = () => {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
 
+  const { addToCart, wishlistItems, addToWishlist, removeFromWishlist } = useCart();
+
   // Statistics counters
   const [stats, setStats] = useState({ clients: 0, villages: 0, districts: 0, purity: 0 });
+
+  // 1. Track GA4 view_item_list event
+  useEffect(() => {
+    if (filteredProducts.length > 0) {
+      const listName = activeFilter === 'all' 
+        ? 'Homepage Featured Products' 
+        : `Homepage Category: ${activeFilter}`;
+      trackViewItemList(filteredProducts, listName);
+    }
+  }, [filteredProducts, activeFilter]);
+
+  const handleSelectProduct = (product: Product, index: number) => {
+    const listName = activeFilter === 'all' 
+      ? 'Homepage Featured Products' 
+      : `Homepage Category: ${activeFilter}`;
+    trackSelectItem(product, index + 1, listName);
+  };
 
   useEffect(() => {
     // Fetch DB records
@@ -261,7 +283,39 @@ export const Home: React.FC = () => {
           <div className="magazine-pinterest-layout">
             {filteredProducts.map((prod, idx) => (
               <div key={prod.id} className="magazine-item-container">
-                <div className="wooden-crate-card">
+                <div className="wooden-crate-card" style={{ position: 'relative' }}>
+                  
+                  {/* Wishlist Button Overlay */}
+                  <button
+                    onClick={() => {
+                      if (wishlistItems.some(p => p.id === prod.id)) {
+                        removeFromWishlist(prod.id);
+                      } else {
+                        addToWishlist(prod);
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '45px',
+                      right: '15px',
+                      zIndex: 10,
+                      background: 'rgba(252, 250, 245, 0.9)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '50%',
+                      width: '36px',
+                      height: '36px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                      color: wishlistItems.some(p => p.id === prod.id) ? '#e53935' : 'gray'
+                    }}
+                    title={wishlistItems.some(p => p.id === prod.id) ? 'পছন্দের তালিকা থেকে বাদ দিন' : 'পছন্দের তালিকায় যোগ করুন'}
+                  >
+                    <Heart size={16} fill={wishlistItems.some(p => p.id === prod.id) ? '#e53935' : 'none'} />
+                  </button>
+
                   <div className="crate-header-bar">
                     <span>CRATE #SH-00{idx + 1}</span>
                     <span style={{ color: prod.status === 'in-stock' ? '#64dd17' : '#F39C12' }}>
@@ -271,7 +325,9 @@ export const Home: React.FC = () => {
                   
                   <div className="crate-image-container">
                     <span className="crate-status-tag">{prod.subcategory}</span>
-                    <img src={getImageUrl(prod.img)} alt={prod.title} loading="lazy" />
+                    <Link to={`/product/${prod.id}`} onClick={() => handleSelectProduct(prod, idx)}>
+                      <img src={getImageUrl(prod.img)} alt={prod.title} loading="lazy" />
+                    </Link>
                   </div>
 
                   <div className="crate-body-content">
@@ -279,10 +335,14 @@ export const Home: React.FC = () => {
                       <span>📍 {prod.location}</span>
                       <span>📅 {prod.harvest}</span>
                     </div>
-                    <h3 className="crate-prod-title">{prod.title}</h3>
+                    <h3 className="crate-prod-title">
+                      <Link to={`/product/${prod.id}`} onClick={() => handleSelectProduct(prod, idx)}>
+                        {prod.title}
+                      </Link>
+                    </h3>
                     <p className="crate-story-teaser">{prod.story.substring(0, 85)}...</p>
                     
-                    <div className="crate-footer-row">
+                    <div className="crate-footer-row" style={{ marginBottom: '15px' }}>
                       <div className="crate-price-block">
                         <span style={{ fontSize: '0.75rem', color: 'gray' }}>মূল্য</span>
                         <span className="crate-price-val">{prod.price}</span>
@@ -290,9 +350,29 @@ export const Home: React.FC = () => {
                       <span className="crate-weight-val">{prod.weight}</span>
                     </div>
 
-                    <div className="crate-actions-row">
-                      <a href={`tel:+8801873520181`} className="btn btn-primary" style={{ padding: '8px' }}>📞 অর্ডার করুন</a>
-                      <Link to={`/product/${prod.id}`} className="btn btn-outline" style={{ padding: '8px' }}>বিস্তারিত</Link>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
+                      <button 
+                        onClick={() => addToCart(prod, 1)}
+                        className="btn btn-primary"
+                        style={{
+                          padding: '8px', 
+                          fontSize: '0.88rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <ShoppingCart size={15} /> ঝুড়িতে যোগ করুন
+                      </button>
+                      <Link 
+                        to={`/product/${prod.id}`} 
+                        onClick={() => handleSelectProduct(prod, idx)}
+                        className="btn btn-outline" 
+                        style={{ padding: '8px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        বিস্তারিত
+                      </Link>
                     </div>
                   </div>
                 </div>
