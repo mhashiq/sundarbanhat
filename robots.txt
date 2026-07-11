@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mhashiq.github.io/sundarbanhat/sitemap.xml
+Sitemap: https://sundarbanhat.com/sitemap.xml
