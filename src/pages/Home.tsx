@@ -83,7 +83,7 @@ export const Home: React.FC = () => {
         <title>সুন্দরবন হাট - সুন্দরবনের খাঁটি স্বাদ, সরাসরি আপনার ঘরে</title>
         <meta name="description" content="সুন্দরবন হাট (Sundarban Hat) - শ্যামনগর, সাতক্ষীরা থেকে সরাসরি সংগৃহীত ১০০% খাঁটি খলিশা মধু, তাজা বাগদা চিংড়ি, কাঠের ঘানির সরিষার তেল এবং উপকূলীয় খাঁটি খাদ্যপণ্য।" />
         <meta name="keywords" content="সুন্দরবন হাট, খলিশা মধু, সুন্দরবনের মধু, চিংড়ি, বাগদা চিংড়ি, ঘানির সরিষার তেল, সাতক্ষীরার আম, অর্গানিক ফুড, উপকূলীয় খাদ্য" />
-        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/" />
+        <link rel="canonical" href="https://sundarbanhat.com/" />
         <script type="application/ld+json">
           {JSON.stringify(faqSchema)}
         </script>

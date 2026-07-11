@@ -8,7 +8,7 @@ export const Contact: React.FC = () => {
         <title>যোগাযোগ - সুন্দরবন হাট</title>
         <meta name="description" content="সুন্দরবন হাটের সাথে সরাসরি যোগাযোগ করুন। মোবাইল নম্বর: ০১৮৭৩-৫২০১৮১, উপজেলা মোড়, শ্যামনগর, সাতক্ষীরা শাখা অফিস।" />
         <meta name="keywords" content="সুন্দরবন হাট ঠিকানা, সুন্দরবন হাট ফোন নাম্বার, শ্যামনগর সাতক্ষীরা অফিস" />
-        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/contact" />
+        <link rel="canonical" href="https://sundarbanhat.com/#/contact" />
       </Helmet>
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>
         <div className="container">

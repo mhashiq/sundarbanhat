@@ -42,7 +42,7 @@ export const Products: React.FC = () => {
         <title>পণ্যসমূহ - সুন্দরবন হাট</title>
         <meta name="description" content="সুন্দরবন হাটের সেরা খাঁটি খাদ্যপণ্যসমূহ - খলিশা ফুলের কাঁচা মধু, লোনা পানির চিংড়ি, সরিষার তেল এবং দেশি আতপ চালের বিবরণ ও অর্ডার লিংক।" />
         <meta name="keywords" content="সুন্দরবন হাট পণ্য, খাঁটি খলিশা মধু দাম, বাগদা চিংড়ি অর্ডার" />
-        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/products" />
+        <link rel="canonical" href="https://sundarbanhat.com/#/products" />
       </Helmet>
 
       <section style={{ backgroundColor: 'var(--color-sand-dark)', padding: '50px 0', textAlign: 'center' }}>

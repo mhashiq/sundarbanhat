@@ -34,7 +34,7 @@ export const FaqPage: React.FC = () => {
         <title>জিজ্ঞাসা ও ব্লগ - সুন্দরবন হাট</title>
         <meta name="description" content="সুন্দরবন হাটের পণ্য সংগ্রহ পদ্ধতি, চিংড়ির কোল্ড চেইন প্যাকেজিং, এবং খাঁটি মধু সম্পর্কিত জিজ্ঞাসার উত্তর ও তথ্যসমৃদ্ধ প্রবন্ধসমূহ।" />
         <meta name="keywords" content="সুন্দরবন হাট প্রশ্ন, মধু খাঁটি পরীক্ষা, চিংড়ি সংরক্ষণ, মৌয়ালদের গল্প" />
-        <link rel="canonical" href="https://mhashiq.github.io/sundarbanhat/#/faq" />
+        <link rel="canonical" href="https://sundarbanhat.com/#/faq" />
         <script type="application/ld+json">
           {JSON.stringify(faqSchema)}
         </script>

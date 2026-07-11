@@ -49,7 +49,7 @@ export const ProductDetails: React.FC = () => {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.title,
-    "image": `https://mhashiq.github.io/sundarbanhat${product.img}`,
+    "image": `https://sundarbanhat.com${product.img}`,
     "description": product.story,
     "offers": {
       "@type": "Offer",
@@ -64,8 +64,8 @@ export const ProductDetails: React.FC = () => {
       <Helmet>
         <title>{product.title} - সুন্দরবন হাট</title>
         <meta name="description" content={`${product.title} - ${product.story.substring(0, 150)}`} />
-        <meta name="keywords" content={`সুন্দরবন হাট, ${product.title}, ${product.subcategory}`} />
-        <link rel="canonical" href={`https://mhashiq.github.io/sundarbanhat/#/product/${product.id}`} />
+        <meta name="keywords" content={` सुंदरবন হাট, ${product.title}, ${product.subcategory}`} />
+        <link rel="canonical" href={`https://sundarbanhat.com/#/product/${product.id}`} />
         <script type="application/ld+json">
           {JSON.stringify(productSchema)}
         </script>

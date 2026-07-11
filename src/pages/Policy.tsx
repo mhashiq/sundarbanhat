@@ -164,7 +164,7 @@ export const PolicyPage: React.FC = () => {
       <Helmet>
         <title>{meta.title} - সুন্দরবন হাট</title>
         <meta name="description" content={meta.desc} />
-        <link rel="canonical" href={`https://mhashiq.github.io/sundarbanhat/#/policy/${policyType}`} />
+        <link rel="canonical" href={`https://sundarbanhat.com/#/policy/${policyType}`} />
       </Helmet>
       <section className="section" style={{ backgroundColor: 'var(--color-sand)' }}>
         <div className="container" style={{ maxWidth: '850px' }}>
