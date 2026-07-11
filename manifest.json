@@ -1,0 +1,21 @@
+{
+  "short_name": "সুন্দরবন হাট",
+  "name": "সুন্দরবন হাট (Sundarban Hat)",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/sundarbanhat/",
+  "background_color": "#FAF5EA",
+  "theme_color": "#144A26",
+  "display": "standalone",
+  "orientation": "portrait"
+}
