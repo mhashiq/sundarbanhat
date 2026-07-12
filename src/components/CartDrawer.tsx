@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { getImageUrl } from '../services/dataService';
 import { trackBeginCheckout } from '../analytics/analytics';
+import { useNavigate } from 'react-router-dom';
 
 interface CartDrawerProps {
   onOpenCheckout: () => void;
@@ -11,6 +12,7 @@ interface CartDrawerProps {
 export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   const { cartItems, cartOpen, setCartOpen, updateQuantity, removeFromCart } = useCart();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Close on ESC keypress
   useEffect(() => {
@@ -34,6 +36,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [cartOpen, setCartOpen]);
 
+  // Auto-close timer: remains open for 4 seconds, resets on item addition/changes
+  useEffect(() => {
+    if (cartOpen && cartItems.length > 0) {
+      const timer = setTimeout(() => {
+        setCartOpen(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [cartOpen, cartItems, setCartOpen]);
+
   if (!cartOpen) return null;
 
   const totalAmount = cartItems.reduce(
@@ -41,13 +53,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     0
   );
 
+  const totalItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   const handleCheckoutClick = () => {
-    // 1. Fire GA4 begin_checkout event
     trackBeginCheckout(cartItems);
-    // 2. Close drawer
     setCartOpen(false);
-    // 3. Open Checkout form
     onOpenCheckout();
+  };
+
+  const handleViewCartClick = () => {
+    setCartOpen(false);
+    navigate('/products');
   };
 
   return (
@@ -61,7 +77,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
       backdropFilter: 'blur(4px)',
       zIndex: 9999,
       display: 'flex',
-      justifyContent: 'flex-end',
+      justifyContent: 'flex-start',
       transition: 'opacity 0.3s ease'
     }}>
       <div 
@@ -71,11 +87,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
           maxWidth: '450px',
           height: '100%',
           backgroundColor: 'var(--color-white)',
-          borderLeft: '5px double var(--color-mud)',
+          borderRight: '5px double var(--color-mud)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-10px 0 30px rgba(0,0,0,0.15)',
-          animation: 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          boxShadow: '10px 0 30px rgba(0,0,0,0.15)',
+          animation: 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
         }}
       >
         {/* Header */}
@@ -89,10 +105,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <ShoppingBag style={{ color: 'var(--color-mangrove)' }} size={24} />
-            <h3 style={{ margin: 0, color: 'var(--color-forest-dark)', fontSize: '1.25rem' }}>অর্ডার ঝুড়ি</h3>
+            <h3 style={{ margin: 0, color: 'var(--color-forest-dark)', fontSize: '1.25rem', fontWeight: 'bold' }}>
+              অর্ডার ঝুড়ি ({totalItemsCount}টি পণ্য)
+            </h3>
           </div>
           <button 
             onClick={() => setCartOpen(false)}
+            aria-label="Close Cart Drawer"
             style={{
               background: 'none',
               border: 'none',
@@ -130,7 +149,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
               <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'var(--color-mud)' }}>আপনার ঝুড়িটি খালি!</p>
               <p style={{ fontSize: '0.85rem', marginTop: '5px' }}>সুন্দরবনের তাজা ও খাঁটি পণ্যগুলো অর্ডার করতে পণ্য তালিকা দেখুন।</p>
               <button 
-                onClick={() => setCartOpen(false)}
+                onClick={handleViewCartClick}
                 className="btn btn-outline"
                 style={{ marginTop: '20px', padding: '8px 20px' }}
               >
@@ -168,7 +187,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                       <h4 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--color-forest-dark)', fontWeight: 'bold' }}>
                         {item.product.title}
                       </h4>
-                      <span style={{ fontSize: '0.78rem', color: 'gray' }}>{item.product.weight}</span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--color-mud)', fontWeight: 'bold' }}>
+                        ওজন/সাইজ: {item.product.weight || 'সাধারণ'}
+                      </span>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
@@ -196,9 +217,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                         </button>
                       </div>
 
-                      {/* Price */}
-                      <div style={{ fontWeight: 'bold', color: 'var(--color-mangrove)', fontSize: '1.05rem' }}>
-                        ৳{item.product.priceNum * item.quantity}
+                      {/* Prices */}
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'gray' }}>৳{item.product.priceNum} × {item.quantity}</div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--color-mangrove)', fontSize: '1.05rem' }}>
+                          ৳{item.product.priceNum * item.quantity}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -226,23 +250,27 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
           )}
         </div>
 
-        {/* Footer Summary & Checkout */}
+        {/* Footer Summary & Actions */}
         {cartItems.length > 0 && (
           <div style={{
             padding: '24px',
             borderTop: '1px solid var(--color-border)',
-            backgroundColor: 'var(--color-sand)'
+            backgroundColor: 'var(--color-sand)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '20px'
+              marginBottom: '8px'
             }}>
-              <span style={{ fontSize: '1.05rem', color: 'var(--color-mud)', fontWeight: '500' }}>মোট মূল্য</span>
+              <span style={{ fontSize: '1.05rem', color: 'var(--color-mud)', fontWeight: '500' }}>উপমোট মূল্য (Subtotal):</span>
               <span style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--color-mangrove)' }}>৳{totalAmount}</span>
             </div>
 
+            {/* Action Buttons */}
             <button 
               onClick={handleCheckoutClick}
               className="btn btn-primary"
@@ -258,16 +286,49 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                 borderRadius: 'var(--border-radius-md)'
               }}
             >
-              অর্ডার সম্পন্ন করুন 🛒
+              চেকআউট করুন (Checkout) 🛒
             </button>
 
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                onClick={handleViewCartClick}
+                className="btn btn-outline"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  backgroundColor: '#fff',
+                  border: '1px solid var(--color-border)',
+                  cursor: 'pointer'
+                }}
+              >
+                পণ্য দেখুন (View Cart)
+              </button>
+              
+              <button 
+                onClick={() => setCartOpen(false)}
+                className="btn btn-outline"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  backgroundColor: '#fff',
+                  border: '1px solid var(--color-border)',
+                  cursor: 'pointer'
+                }}
+              >
+                শপিং চালিয়ে যান
+              </button>
+            </div>
+
             <p style={{
-              fontSize: '0.78rem',
+              fontSize: '0.75rem',
               color: 'gray',
               textAlign: 'center',
-              marginTop: '12px',
-              marginRight: '0',
-              marginLeft: '0'
+              marginTop: '4px',
+              margin: '0'
             }}>
               * ঢাকা ও সাতক্ষীরায় ডেলিভারি চার্জ ৳৬০, অন্যান্য জেলায় ৳১২০। ক্যাশ অন ডেলিভারি প্রযোজ্য।
             </p>
@@ -276,8 +337,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
       </div>
 
       <style>{`
-        @keyframes slideIn {
-          from { transform: translateX(100%); }
+        @keyframes slideInLeft {
+          from { transform: translateX(-100%); }
           to { transform: translateX(0); }
         }
       `}</style>

@@ -17,10 +17,15 @@ import { PolicyPage } from './pages/Policy';
 import { AdminGuard } from './components/AdminGuard';
 import { CustomerGuard } from './components/CustomerGuard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminCustomers } from './pages/AdminCustomers';
+import { AdminOrders } from './pages/AdminOrders';
+import { AdminOrderDetails } from './pages/AdminOrderDetails';
+import { AdminOrderEdit } from './pages/AdminOrderEdit';
 import { AdminLogin } from './pages/AdminLogin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Account } from './pages/Account';
+import { OrderDetails } from './pages/OrderDetails';
 import { CartDrawer } from './components/CartDrawer';
 import { AnalyticsDebugger } from './components/AnalyticsDebugger';
 import { trackPageView } from './analytics/analytics';
@@ -40,18 +45,21 @@ const PageTrackerAndScroll: React.FC = () => {
 
 // Global App components that need CartContext access
 const AppContent: React.FC = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAuthRoute = ['/login', '/register', '/admin/login'].includes(location.pathname);
 
   return (
-    <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+    <div className="app-layout" data-route={location.pathname} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {!isAdminRoute && <Header />}
       
       {/* Global Cart Drawer Overlay */}
-      <CartDrawer onOpenCheckout={() => window.location.hash = '#/checkout'} />
+      {!isAdminRoute && <CartDrawer onOpenCheckout={() => window.location.hash = '#/checkout'} />}
       
       {/* Real-time Analytics Debugger (restricted to development/toggle mode) */}
       <AnalyticsDebugger />
 
-      <main style={{ flexGrow: 1 }}>
+      <main className="app-main" style={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
@@ -69,12 +77,20 @@ const AppContent: React.FC = () => {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-success/:orderId" element={<OrderSuccess />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/account/orders/:transactionId" element={<OrderDetails />} />
           </Route>
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminGuard />}>
+            <Route path="/orders" element={<AdminOrders />} />
+            <Route path="/orders/:orderId" element={<AdminOrderDetails />} />
+            <Route path="/orders/:orderId/edit" element={<AdminOrderEdit />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
+            <Route path="/admin/orders/:orderId/edit" element={<AdminOrderEdit />} />
           </Route>
 
           <Route path="/faq" element={<FaqPage />} />
@@ -83,7 +99,7 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
       
-      <Footer />
+      {!isAdminRoute && !isAuthRoute && <Footer />}
     </div>
   );
 };

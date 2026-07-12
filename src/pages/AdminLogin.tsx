@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
 import { Helmet } from 'react-helmet-async';
 import { Lock, Mail, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -11,6 +11,7 @@ export const AdminLogin: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // If already logged in as admin, redirect directly
   useEffect(() => {
@@ -79,7 +80,9 @@ export const AdminLogin: React.FC = () => {
 
       setSuccessMsg('লগইন সফল হয়েছে! আপনাকে অ্যাডমিন ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...');
       setTimeout(() => {
-        navigate('/admin/dashboard', { replace: true });
+        const fromPath = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+        const redirectPath = fromPath?.pathname ? `${fromPath.pathname}${fromPath.search || ''}` : '/admin/dashboard';
+        navigate(redirectPath, { replace: true });
       }, 1200);
 
     } catch (err: any) {

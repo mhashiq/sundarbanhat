@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
 
 export const AdminGuard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -89,5 +90,5 @@ export const AdminGuard: React.FC = () => {
     );
   }
 
-  return isAdmin ? <Outlet /> : <Navigate to="/login" replace />;
+  return isAdmin ? <Outlet /> : <Navigate to="/login" replace state={{ from: location }} />;
 };

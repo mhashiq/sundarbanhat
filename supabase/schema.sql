@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS public.orders (
     shipping_cost NUMERIC NOT NULL DEFAULT 0,
     subtotal NUMERIC NOT NULL,
     total NUMERIC NOT NULL,
-    payment_method TEXT NOT NULL CHECK (payment_method IN ('cod', 'bkash')),
-    order_status TEXT DEFAULT 'pending' CHECK (order_status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded')) NOT NULL,
-    payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')) NOT NULL,
+    payment_method TEXT NOT NULL CHECK (payment_method IN ('cod', 'bkash', 'nagad', 'rocket', 'bank_transfer')),
+    order_status TEXT DEFAULT 'pending_payment' CHECK (order_status IN ('pending', 'pending_payment', 'payment_submitted', 'payment_verification', 'payment_approved', 'order_confirmed', 'processing', 'packed', 'shipped', 'delivered', 'cancelled', 'refunded', 'payment_rejected', 'correction_requested')) NOT NULL,
+    payment_status TEXT DEFAULT 'pending_payment' CHECK (payment_status IN ('pending', 'pending_payment', 'payment_submitted', 'under_review', 'payment_approved', 'payment_rejected', 'paid', 'failed', 'refunded', 'correction_requested')) NOT NULL,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -154,15 +154,39 @@ CREATE POLICY "Anyone can place orders"
 ON public.orders FOR INSERT TO anon, authenticated WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Only admins can view/manage orders" ON public.orders;
-CREATE POLICY "Only admins can view/manage orders" 
-ON public.orders FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+CREATE POLICY "Customers and admins can view orders" 
+ON public.orders FOR SELECT TO authenticated USING (
+  public.is_admin()
+  OR customer_id = auth.uid()
+  OR (
+    customer_id IS NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.customers c
+      WHERE c.id = auth.uid() AND c.phone = orders.phone
+    )
+  )
+);
+
+DROP POLICY IF EXISTS "Only admins can manage orders" ON public.orders;
+CREATE POLICY "Only admins can manage orders" 
+ON public.orders FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Anyone can insert order items" ON public.order_items;
 CREATE POLICY "Anyone can insert order items" 
 ON public.order_items FOR INSERT TO anon, authenticated WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Only admins can view order items" ON public.order_items;
-CREATE POLICY "Only admins can view order items" 
+DROP POLICY IF EXISTS "Customers can view order items" ON public.order_items;
+CREATE POLICY "Customers can view order items" 
+ON public.order_items FOR SELECT TO authenticated USING (
+  public.is_admin() OR EXISTS (
+    SELECT 1 FROM public.orders
+    WHERE public.orders.id = order_items.order_id AND public.orders.customer_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "Only admins can manage order items" ON public.order_items;
+CREATE POLICY "Only admins can manage order items" 
 ON public.order_items FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- 3.5 Policies for Contact Messages

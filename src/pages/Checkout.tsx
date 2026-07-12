@@ -7,7 +7,7 @@ import {
   trackAddShippingInfo, 
   trackAddPaymentInfo
 } from '../analytics/analytics';
-import { dataService } from '../services/dataService';
+import { dataService, type PaymentMethod } from '../services/dataService';
 
 export const Checkout: React.FC = () => {
   const { cartItems, clearCart } = useCart();
@@ -24,7 +24,7 @@ export const Checkout: React.FC = () => {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('satkhira'); // satkhira, dhaka, other
   const [notes, setNotes] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // cod, bkash
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,7 +50,7 @@ export const Checkout: React.FC = () => {
         // 1. Fetch customer details
         const { data: profile } = await supabase
           .from('customers')
-          .select('full_name, phone')
+          .select('full_name, phone, email')
           .eq('id', session.user.id)
           .maybeSingle();
 
@@ -101,8 +101,16 @@ export const Checkout: React.FC = () => {
   };
 
   const handlePaymentSelect = (method: string) => {
-    setPaymentMethod(method);
-    const paymentType = method === 'cod' ? 'Cash on Delivery' : 'Mobile Banking';
+    const selectedMethod = method as PaymentMethod;
+    setPaymentMethod(selectedMethod);
+    const paymentTypeMap: Record<PaymentMethod, string> = {
+      cod: 'Cash on Delivery',
+      bkash: 'bKash',
+      nagad: 'Nagad',
+      rocket: 'Rocket',
+      bank_transfer: 'Bank Transfer'
+    };
+    const paymentType = paymentTypeMap[selectedMethod] || 'Manual Payment';
     trackAddPaymentInfo(cartItems, paymentType);
   };
 
@@ -118,6 +126,34 @@ export const Checkout: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const paymentOptions: Array<{ value: PaymentMethod; title: string; description: string }> = [
+    {
+      value: 'cod',
+      title: 'ক্যাশ অন ডেলিভারি (Cash on Delivery)',
+      description: 'পণ্য হাতে পেয়ে পরিশোধ করবেন। অর্ডারটি ম্যানুয়াল রিভিউতে যাবে।'
+    },
+    {
+      value: 'bkash',
+      title: 'bKash',
+      description: 'bKash দিয়ে পেমেন্ট করে পরে ট্রানজেকশন ID জমা দিন।'
+    },
+    {
+      value: 'nagad',
+      title: 'Nagad',
+      description: 'Nagad দিয়ে পেমেন্ট করে পরে ট্রানজেকশন ID জমা দিন।'
+    },
+    {
+      value: 'rocket',
+      title: 'Rocket',
+      description: 'Rocket দিয়ে পেমেন্ট করে পরে ট্রানজেকশন ID জমা দিন।'
+    },
+    {
+      value: 'bank_transfer',
+      title: 'Bank Transfer',
+      description: 'ব্যাংক ট্রান্সফারের রসিদ/স্ক্রিনশট যুক্ত করতে পারবেন।'
+    }
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -127,11 +163,37 @@ export const Checkout: React.FC = () => {
     const transactionId = `SH-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('অর্ডার করতে আগে লগইন করুন।');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      const activeCustomerId = session.user.id;
+      setCustomerId(activeCustomerId);
+      const resolvedCustomerId = customerId || activeCustomerId;
+
+      const { error: customerSyncError } = await supabase
+        .from('customers')
+        .upsert({
+          id: activeCustomerId,
+          full_name: name.trim(),
+          phone: phone.trim(),
+          email: session.user.email || null,
+          last_active_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (customerSyncError) {
+        throw customerSyncError;
+      }
+
       // 1. Prepare Order database record payload
       const orderPayload = {
         transaction_id: transactionId,
         customer_name: name.trim(),
         phone: phone.trim(),
+        email: session.user.email || null,
         address: address.trim(),
         city: city === 'satkhira' ? 'Satkhira' : city === 'dhaka' ? 'Dhaka' : 'Other',
         shipping_cost: shippingCost,
@@ -139,7 +201,7 @@ export const Checkout: React.FC = () => {
         total: total,
         payment_method: paymentMethod,
         notes: notes.trim(),
-        customer_id: customerId // Linked if logged in
+        customer_id: resolvedCustomerId
       };
 
       // Map cart items into OrderItemInput
@@ -153,6 +215,26 @@ export const Checkout: React.FC = () => {
 
       // 2. Write Order and OrderItems to Supabase database
       const dbOrderId = await dataService.createOrder(orderPayload, orderItems);
+
+      if (import.meta.env.DEV) {
+        const [orderVerify, itemsVerify, paymentsVerify] = await Promise.all([
+          supabase.from('orders').select('id, transaction_id, customer_id, payment_method, payment_status, order_status').eq('id', dbOrderId).maybeSingle(),
+          supabase.from('order_items').select('id, order_id, product_id, quantity').eq('order_id', dbOrderId),
+          supabase.from('payments').select('id, order_id, status').eq('order_id', dbOrderId)
+        ]);
+
+        console.info('[Checkout][DEV] Order placement verification', {
+          authUserId: session.user.id,
+          dbOrderId,
+          transactionId,
+          order: orderVerify.data,
+          orderReadError: orderVerify.error?.message,
+          itemsCount: (itemsVerify.data || []).length,
+          itemsReadError: itemsVerify.error?.message,
+          paymentsCount: (paymentsVerify.data || []).length,
+          paymentsReadError: paymentsVerify.error?.message
+        });
+      }
 
       // 3. Log status history tracking entry in database
       await supabase
@@ -323,58 +405,36 @@ export const Checkout: React.FC = () => {
                 💳 পেমেন্ট পদ্ধতি
               </h3>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Cash on Delivery */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '15px',
-                  border: `2px solid ${paymentMethod === 'cod' ? 'var(--color-mangrove)' : 'var(--color-border)'}`,
-                  borderRadius: 'var(--border-radius-sm)',
-                  cursor: 'pointer',
-                  backgroundColor: paymentMethod === 'cod' ? 'var(--color-sand)' : 'transparent',
-                  transition: 'var(--transition-smooth)'
-                }}>
-                  <input 
-                    type="radio" 
-                    name="payment" 
-                    checked={paymentMethod === 'cod'} 
-                    onChange={() => handlePaymentSelect('cod')}
-                    style={{ accentColor: 'var(--color-mangrove)', width: '16px', height: '16px' }}
-                    disabled={loading}
-                  />
-                  <div>
-                    <span style={{ fontWeight: 'bold', color: 'var(--color-forest-dark)', fontSize: '0.98rem', display: 'block' }}>ক্যাশ অন ডেলিভারি (Cash on Delivery)</span>
-                    <span style={{ fontSize: '0.78rem', color: 'gray' }}>পণ্য হাতে পেয়ে পেমেন্ট করবেন। কোনো অগ্রিম চার্জ নেই।</span>
-                  </div>
-                </label>
-
-                {/* Mobile Banking / Online Manual Pay */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '15px',
-                  border: `2px solid ${paymentMethod === 'bkash' ? 'var(--color-mangrove)' : 'var(--color-border)'}`,
-                  borderRadius: 'var(--border-radius-sm)',
-                  cursor: 'pointer',
-                  backgroundColor: paymentMethod === 'bkash' ? 'var(--color-sand)' : 'transparent',
-                  transition: 'var(--transition-smooth)'
-                }}>
-                  <input 
-                    type="radio" 
-                    name="payment" 
-                    checked={paymentMethod === 'bkash'} 
-                    onChange={() => handlePaymentSelect('bkash')}
-                    style={{ accentColor: 'var(--color-mangrove)', width: '16px', height: '16px' }}
-                    disabled={loading}
-                  />
-                  <div>
-                    <span style={{ fontWeight: 'bold', color: 'var(--color-forest-dark)', fontSize: '0.98rem', display: 'block' }}>মোবাইল ব্যাংকিং (বিকাশ/নগদ/রকেট)</span>
-                    <span style={{ fontSize: '0.78rem', color: 'gray' }}>অর্ডার নিশ্চিত করার পর পেমেন্ট ট্রানজেকশন তথ্য প্রদান করুন।</span>
-                  </div>
-                </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                {paymentOptions.map(option => (
+                  <label
+                    key={option.value}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      padding: '15px',
+                      border: `2px solid ${paymentMethod === option.value ? 'var(--color-mangrove)' : 'var(--color-border)'}`,
+                      borderRadius: 'var(--border-radius-sm)',
+                      cursor: 'pointer',
+                      backgroundColor: paymentMethod === option.value ? 'var(--color-sand)' : 'transparent',
+                      transition: 'var(--transition-smooth)'
+                    }}
+                  >
+                    <input 
+                      type="radio" 
+                      name="payment" 
+                      checked={paymentMethod === option.value} 
+                      onChange={() => handlePaymentSelect(option.value)}
+                      style={{ accentColor: 'var(--color-mangrove)', width: '16px', height: '16px', marginTop: '4px' }}
+                      disabled={loading}
+                    />
+                    <div>
+                      <span style={{ fontWeight: 'bold', color: 'var(--color-forest-dark)', fontSize: '0.98rem', display: 'block' }}>{option.title}</span>
+                      <span style={{ fontSize: '0.78rem', color: 'gray' }}>{option.description}</span>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
           </form>

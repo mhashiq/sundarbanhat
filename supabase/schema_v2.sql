@@ -26,6 +26,34 @@ CREATE TABLE IF NOT EXISTS public.addresses (
 -- 3. Modify Orders Table (Add customer reference)
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL;
 
+-- 3.1 Keep order/payment workflow aligned with the manual approval flow
+ALTER TABLE public.orders
+  ALTER COLUMN order_status SET DEFAULT 'pending_payment';
+
+ALTER TABLE public.orders
+  ALTER COLUMN payment_status SET DEFAULT 'pending_payment';
+
+ALTER TABLE public.orders
+  DROP CONSTRAINT IF EXISTS orders_payment_method_check;
+
+ALTER TABLE public.orders
+  ADD CONSTRAINT orders_payment_method_check
+  CHECK (payment_method IN ('cod', 'bkash', 'nagad', 'rocket', 'bank_transfer'));
+
+ALTER TABLE public.orders
+  DROP CONSTRAINT IF EXISTS orders_order_status_check;
+
+ALTER TABLE public.orders
+  ADD CONSTRAINT orders_order_status_check
+  CHECK (order_status IN ('pending', 'pending_payment', 'payment_submitted', 'payment_verification', 'payment_approved', 'order_confirmed', 'processing', 'packed', 'shipped', 'delivered', 'cancelled', 'refunded', 'payment_rejected', 'correction_requested'));
+
+ALTER TABLE public.orders
+  DROP CONSTRAINT IF EXISTS orders_payment_status_check;
+
+ALTER TABLE public.orders
+  ADD CONSTRAINT orders_payment_status_check
+  CHECK (payment_status IN ('pending', 'pending_payment', 'payment_submitted', 'under_review', 'payment_approved', 'payment_rejected', 'paid', 'failed', 'refunded', 'correction_requested'));
+
 -- 4. Create Payments Table (Manual Payment Submissions)
 CREATE TABLE IF NOT EXISTS public.payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -34,9 +62,20 @@ CREATE TABLE IF NOT EXISTS public.payments (
     transaction_id TEXT NOT NULL UNIQUE,
     amount NUMERIC NOT NULL,
     screenshot_url TEXT, -- Supabase Storage file path
-    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')) NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'under_review', 'approved', 'rejected', 'correction_requested')) NOT NULL,
     rejection_reason TEXT,
     payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4.1 Create Payment Proofs Table (Screenshots and optional admin annotations)
+CREATE TABLE IF NOT EXISTS public.payment_proofs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    payment_id UUID NOT NULL REFERENCES public.payments(id) ON DELETE CASCADE,
+    screenshot_url TEXT,
+    file_name TEXT,
+    content_type TEXT,
+    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -55,6 +94,7 @@ CREATE TABLE IF NOT EXISTS public.order_status_history (
 CREATE INDEX IF NOT EXISTS idx_customers_phone ON public.customers(phone);
 CREATE INDEX IF NOT EXISTS idx_addresses_customer ON public.addresses(customer_id);
 CREATE INDEX IF NOT EXISTS idx_payments_order ON public.payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_payment_proofs_payment ON public.payment_proofs(payment_id);
 CREATE INDEX IF NOT EXISTS idx_status_history_order ON public.order_status_history(order_id);
 
 -- ==========================================
@@ -63,6 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_status_history_order ON public.order_status_histo
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payment_proofs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_status_history ENABLE ROW LEVEL SECURITY;
 
 -- 7.1 Customers Table Policies
@@ -86,10 +127,10 @@ ON public.addresses FOR ALL TO authenticated USING (customer_id = auth.uid() OR 
 -- 7.3 Payments Table Policies
 DROP POLICY IF EXISTS "Customers can submit payments for their orders" ON public.payments;
 CREATE POLICY "Customers can submit payments for their orders" 
-ON public.payments FOR INSERT TO authenticated WITH CHECK (
+ON public.payments FOR INSERT TO anon, authenticated WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.orders 
-    WHERE orders.id = order_id AND orders.customer_id = auth.uid()
+    WHERE orders.id = order_id AND (orders.customer_id = auth.uid() OR orders.customer_id IS NULL)
   )
 );
 
@@ -106,6 +147,31 @@ DROP POLICY IF EXISTS "Only admins can modify payments" ON public.payments;
 CREATE POLICY "Only admins can modify payments" 
 ON public.payments FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Customers can submit payment proofs" ON public.payment_proofs;
+CREATE POLICY "Customers can submit payment proofs" 
+ON public.payment_proofs FOR INSERT TO anon, authenticated WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM public.payments p
+    JOIN public.orders o ON o.id = p.order_id
+    WHERE p.id = payment_id AND (o.customer_id = auth.uid() OR o.customer_id IS NULL)
+  )
+);
+
+DROP POLICY IF EXISTS "Customers and admins can view payment proofs" ON public.payment_proofs;
+CREATE POLICY "Customers and admins can view payment proofs" 
+ON public.payment_proofs FOR SELECT TO authenticated USING (
+  public.is_admin() OR EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.orders o ON o.id = p.order_id
+    WHERE p.id = payment_id AND o.customer_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "Only admins can manage payment proofs" ON public.payment_proofs;
+CREATE POLICY "Only admins can manage payment proofs" 
+ON public.payment_proofs FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
 -- 7.4 Order Status History Policies
 DROP POLICY IF EXISTS "Customers can view history for their orders" ON public.order_status_history;
 CREATE POLICY "Customers can view history for their orders" 
@@ -120,13 +186,47 @@ DROP POLICY IF EXISTS "Only admins can manage order history" ON public.order_sta
 CREATE POLICY "Only admins can manage order history" 
 ON public.order_status_history FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Customers can add history entries for their orders" ON public.order_status_history;
+CREATE POLICY "Customers can add history entries for their orders" 
+ON public.order_status_history FOR INSERT TO anon, authenticated WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.orders 
+    WHERE orders.id = order_id AND (orders.customer_id = auth.uid() OR orders.customer_id IS NULL)
+  )
+);
+
 -- Update Orders Policies to allow Customer selective SELECT
 DROP POLICY IF EXISTS "Only admins can view/manage orders" ON public.orders;
 CREATE POLICY "Customers and admins can view orders" 
-ON public.orders FOR SELECT TO authenticated USING (customer_id = auth.uid() OR public.is_admin());
+ON public.orders FOR SELECT TO authenticated USING (
+  public.is_admin()
+  OR customer_id = auth.uid()
+  OR (
+    customer_id IS NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.customers c
+      WHERE c.id = auth.uid() AND c.phone = orders.phone
+    )
+  )
+);
 
 CREATE POLICY "Admins can update orders" 
 ON public.orders FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Customers can view order items" ON public.order_items;
+CREATE POLICY "Customers can view order items"
+ON public.order_items FOR SELECT TO authenticated USING (
+  public.is_admin() OR EXISTS (
+    SELECT 1
+    FROM public.orders o
+    WHERE o.id = order_items.order_id AND o.customer_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "Only admins can manage order items" ON public.order_items;
+CREATE POLICY "Only admins can manage order items"
+ON public.order_items FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- =========================================================================
 -- 8. Refactor handle_new_user trigger to handle Customer & Admin routing

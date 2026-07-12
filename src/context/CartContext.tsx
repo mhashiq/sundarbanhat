@@ -65,6 +65,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     // Track GA4 event
     trackAddToCart(product, quantity);
+    // Automatically open Cart Drawer
+    setCartOpen(true);
   };
 
   const removeFromCart = (productId: string, quantity = 1) => {

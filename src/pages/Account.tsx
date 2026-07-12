@@ -13,9 +13,11 @@ import {
   DollarSign, 
   Upload,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Check
 } from 'lucide-react';
 import { getImageUrl } from '../services/dataService';
+import { dataService } from '../services/dataService';
 import type { Product } from '../services/dataService';
 import { trackPurchase } from '../analytics/analytics';
 
@@ -42,7 +44,7 @@ export const Account: React.FC = () => {
 
   // Manual Payment Form state
   const [submittingPaymentOrderId, setSubmittingPaymentOrderId] = useState<string | null>(null);
-  const [payMethod, setPayMethod] = useState('bKash');
+  const [payMethod, setPayMethod] = useState('bkash');
   const [payTxId, setPayTxId] = useState('');
   const [payAmount, setPayAmount] = useState<number>(0);
   const [payFile, setPayFile] = useState<File | null>(null);
@@ -52,6 +54,27 @@ export const Account: React.FC = () => {
 
   useEffect(() => {
     fetchCustomerDashboard();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      fetchCustomerDashboard();
+    }, 30000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('customer-order-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchCustomerDashboard())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => fetchCustomerDashboard())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_status_history' }, () => fetchCustomerDashboard())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchCustomerDashboard = async () => {
@@ -101,14 +124,8 @@ export const Account: React.FC = () => {
         .order('is_default', { ascending: false });
       setAddresses(addrList || []);
 
-      // 4. Fetch orders
-      const { data: ordList } = await supabase
-        .from('orders')
-        .select('*, order_items(*, products(*))')
-        .eq('customer_id', session.user.id)
-        .order('created_at', { ascending: false });
-
-      const fetchedOrders = ordList || [];
+      // 4. Fetch detailed orders
+      const fetchedOrders = await dataService.getCustomerOrders(session.user.id);
       setOrders(fetchedOrders);
 
       // 5. GA4 Purchase Triggering Logic for Newly Approved Orders
@@ -121,7 +138,7 @@ export const Account: React.FC = () => {
     }
   };
 
-  // Triggers GA4 purchase event only once when admin approves the payment
+  // Triggers GA4 purchase event only once when admin confirms the order
   const triggerGA4Purchases = (fetchedOrders: any[]) => {
     try {
       const trackedPurchases = JSON.parse(localStorage.getItem('tracked_purchases') || '[]');
@@ -129,8 +146,7 @@ export const Account: React.FC = () => {
       let hasUpdates = false;
 
       fetchedOrders.forEach(order => {
-        // Approve status indicates completed purchase tracking stage
-        const isApproved = order.order_status === 'payment_approved' || order.order_status === 'processing' || order.order_status === 'packed' || order.order_status === 'shipped' || order.order_status === 'delivered';
+        const isApproved = order.order_status === 'order_confirmed';
         
         if (isApproved && !trackedPurchases.includes(order.id)) {
           // Map DB items list structure back to GA4 items list format
@@ -165,7 +181,7 @@ export const Account: React.FC = () => {
             value: Number(order.total),
             currency: 'BDT',
             shipping: Number(order.shipping_cost),
-            payment_type: order.payment_method === 'cod' ? 'Cash on Delivery' : 'Mobile Banking',
+            payment_type: order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : order.payment_method.toUpperCase(),
             items: mappedItems
           });
 
@@ -322,7 +338,7 @@ export const Account: React.FC = () => {
       }
 
       // 1. Insert transaction info into public.payments table
-      const { error: paymentErr } = await supabase
+      const { data: paymentRow, error: paymentErr } = await supabase
         .from('payments')
         .insert({
           order_id: submittingPaymentOrderId,
@@ -330,15 +346,31 @@ export const Account: React.FC = () => {
           transaction_id: payTxId.trim(),
           amount: payAmount,
           screenshot_url: fileUrl || null,
-          status: 'pending'
-        });
+          status: 'under_review'
+        })
+        .select('id')
+        .single();
 
       if (paymentErr) throw paymentErr;
+
+      if (paymentRow?.id) {
+        const { error: proofErr } = await supabase
+          .from('payment_proofs')
+          .insert({
+            payment_id: paymentRow.id,
+            screenshot_url: fileUrl || null,
+            file_name: payFile?.name || null,
+            content_type: payFile?.type || null,
+            notes: payTxId.trim()
+          });
+
+        if (proofErr) throw proofErr;
+      }
 
       // 2. Update order status to payment_submitted
       const { error: orderStatusErr } = await supabase
         .from('orders')
-        .update({ order_status: 'payment_submitted' })
+        .update({ order_status: 'payment_submitted', payment_status: 'payment_submitted' })
         .eq('id', submittingPaymentOrderId);
 
       if (orderStatusErr) throw orderStatusErr;
@@ -390,66 +422,179 @@ export const Account: React.FC = () => {
     }
   };
 
-  // Stepper helper to show order lifecycle statuses in Bengali
-  const getStatusStepperHtml = (status: string) => {
-    const statuses = [
-      { code: 'pending_payment', label: 'পেমেন্ট পেন্ডিং', desc: 'অর্ডারটি পেমেন্ট দাখিলের অপেক্ষায় রয়েছে।' },
-      { code: 'payment_submitted', label: 'পেমেন্ট সাবমিট', desc: 'পেমেন্টের তথ্য জমা দেওয়া হয়েছে।' },
-      { code: 'payment_verification', label: 'পেমেন্ট ভেরিফিকেশন', desc: 'অ্যাডমিন পেমেন্ট যাচাই করছেন।' },
-      { code: 'payment_approved', label: 'পেমেন্ট অ্যাপ্রুভ', desc: 'পেমেন্ট নিশ্চিত করা হয়েছে!' },
-      { code: 'processing', label: 'প্রসেসিং', desc: 'আপনার পার্সেল প্রস্তুত করা হচ্ছে।' },
-      { code: 'packed', label: 'প্যাকড', desc: 'পণ্য প্যাকেটজাত করা সম্পন্ন হয়েছে।' },
-      { code: 'shipped', label: 'শিপড', desc: 'পার্সেলটি কুরিয়ারে বুকিং করা হয়েছে।' },
-      { code: 'delivered', label: 'ডেলিভার্ড', desc: 'আপনি পণ্যটি হাতে পেয়েছেন।' }
-    ];
+  const getStatusStepperHtml = (order: any) => {
+    const status = order.order_status;
+    const history = order.order_status_history || [];
 
-    if (status === 'cancelled') {
+    if (status === 'Order Cancelled') {
       return (
-        <div style={{ backgroundColor: '#ffebee', padding: '15px', borderRadius: '8px', border: '1px solid #ffcdd2', display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <AlertCircle color="#c62828" size={20} />
+        <div style={{ 
+          background: '#fef2f2', 
+          border: '1.5px solid #fecaca', 
+          borderRadius: '12px', 
+          padding: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px',
+          boxShadow: '0 4px 10px rgba(239, 68, 68, 0.05)',
+          marginBottom: '20px'
+        }}>
+          <div style={{ background: '#ef4444', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertCircle size={22} />
+          </div>
           <div>
-            <strong style={{ color: '#c62828', display: 'block' }}>অর্ডার বাতিল (Cancelled)</strong>
-            <span style={{ fontSize: '0.85rem', color: '#555' }}>এই অর্ডারটি কোনো কারণে বাতিল করা হয়েছে। অনুসন্ধানের জন্য কল করুন।</span>
+            <h4 style={{ margin: 0, color: '#991b1b', fontSize: '1.05rem', fontWeight: 'bold' }}>অর্ডার বাতিল করা হয়েছে (Order Cancelled)</h4>
+            <p style={{ margin: '4px 0 0 0', color: '#7f1d1d', fontSize: '0.85rem', lineHeight: '1.4' }}>
+              এই অর্ডারটি বাতিল করা হয়েছে। কোনো জিজ্ঞাসা থাকলে আমাদের কাস্টমার সার্ভিসের সাথে যোগাযোগ করুন।
+            </p>
           </div>
         </div>
       );
     }
 
-    const currentIndex = statuses.findIndex(s => s.code === status);
-    
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' }}>
-        
-        {/* Status text */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: 'var(--color-sand)', padding: '12px 15px', borderRadius: '6px' }}>
-          <CheckCircle color="var(--color-mangrove)" size={18} />
-          <span style={{ fontSize: '0.92rem', color: 'var(--color-forest-dark)', fontWeight: 'bold' }}>
-            বর্তমান অবস্থা: {statuses[currentIndex]?.label || 'পেন্ডিং'}
-          </span>
+    if (status === 'Refunded') {
+      const refundEntry = history.find((h: any) => h.status === 'Refunded');
+      const refundDate = refundEntry ? new Date(refundEntry.created_at).toLocaleDateString('bn-BD') : 'N/A';
+      return (
+        <div style={{ 
+          background: '#fff7ed', 
+          border: '1.5px solid #ffedd5', 
+          borderRadius: '12px', 
+          padding: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px',
+          boxShadow: '0 4px 10px rgba(249, 115,  orange, 0.05)',
+          marginBottom: '20px'
+        }}>
+          <div style={{ background: '#f97316', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertCircle size={22} />
+          </div>
+          <div>
+            <h4 style={{ margin: 0, color: '#9a3412', fontSize: '1.05rem', fontWeight: 'bold' }}>টাকা ফেরত দেওয়া হয়েছে (Refunded)</h4>
+            <p style={{ margin: '4px 0 0 0', color: '#7c2d12', fontSize: '0.85rem', lineHeight: '1.4' }}>
+              আপনার পেমেন্ট রিফান্ড সম্পন্ন হয়েছে। রিফান্ড তারিখ: <strong>{refundDate}</strong>।
+            </p>
+          </div>
         </div>
+      );
+    }
 
-        {/* Stepper bubbles */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', padding: '10px 0', overflowX: 'auto', gap: '15px' }}>
-          {statuses.map((s, idx) => {
-            const isCompleted = idx <= currentIndex;
-            const isActive = idx === currentIndex;
-            
+    const steps = [
+      { key: 'Order Placed', label: 'অর্ডার প্লেসড', desc: 'Order Placed' },
+      { key: 'Payment Confirmed', label: 'পেমেন্ট কনফার্মড', desc: 'Payment Confirmed' },
+      { key: 'Order Packing', label: 'অর্ডার প্যাকিং', desc: 'Order Packing' },
+      { key: 'Order Shipping', label: 'অর্ডার শিপিং', desc: 'Order Shipping' },
+      { key: 'Order Delivered', label: 'অর্ডার ডেলিভার্ড', desc: 'Order Delivered' }
+    ];
+
+    const currentIdx = steps.findIndex(s => s.key === status);
+    const activeIdx = currentIdx === -1 ? 0 : currentIdx;
+
+    return (
+      <div style={{ marginBottom: '30px', background: '#fff', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '24px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', position: 'relative' }}>
+          
+          {/* Stepper Line background */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '5%',
+            right: '5%',
+            height: '4px',
+            background: '#e5e7eb',
+            zIndex: 1,
+            borderRadius: '2px'
+          }} />
+
+          {/* Stepper Progress filled line */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '5%',
+            width: `${(activeIdx / (steps.length - 1)) * 90}%`,
+            height: '4px',
+            background: 'linear-gradient(to right, #22c55e, #3b82f6)',
+            zIndex: 1,
+            borderRadius: '2px',
+            transition: 'width 0.6s ease-in-out'
+          }} />
+
+          {steps.map((step, idx) => {
+            const isCompleted = idx < activeIdx;
+            const isActive = idx === activeIdx;
+            const isDelivered = status === 'Order Delivered' && idx === 4;
+            const isCurrentOrCompleted = idx <= activeIdx;
+
+            let bubbleBg = '#f3f4f6';
+            let borderStyle = '2px solid #e5e7eb';
+            let textColor = '#9ca3af';
+
+            if (isCompleted || isDelivered) {
+              bubbleBg = '#dcfce7';
+              borderStyle = '2px solid #22c55e';
+              textColor = '#166534';
+            } else if (isActive) {
+              bubbleBg = '#dbeafe';
+              borderStyle = '2px solid #3b82f6';
+              textColor = '#1e40af';
+            }
+
             return (
-              <div key={s.code} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', textAlign: 'center', opacity: isCompleted ? 1 : 0.45 }}>
+              <div key={step.key} style={{
+                position: 'relative',
+                zIndex: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                flex: '1',
+                textAlign: 'center',
+                minWidth: '100px'
+              }}>
                 <div style={{
-                  width: '24px', height: '24px', borderRadius: '50%', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: isActive ? 'var(--color-honey-glow)' : (isCompleted ? 'var(--color-mangrove)' : '#ccc'),
-                  color: isActive ? 'var(--color-forest-dark)' : '#fff',
-                  border: isActive ? '2px solid var(--color-mangrove)' : 'none'
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: bubbleBg,
+                  border: borderStyle,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  color: isCurrentOrCompleted ? '#fff' : '#9ca3af',
+                  transition: 'all 0.3s ease',
+                  boxShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.4)' : 'none'
                 }}>
-                  {idx + 1}
+                  {isCompleted || isDelivered ? (
+                    <Check size={18} color="#22c55e" style={{ strokeWidth: 3 }} />
+                  ) : (
+                    <span style={{ color: isActive ? '#3b82f6' : '#9ca3af', fontSize: '0.9rem' }}>{idx + 1}</span>
+                  )}
                 </div>
-                <span style={{ fontSize: '0.75rem', marginTop: '6px', fontWeight: isCompleted ? 'bold' : 'normal', color: 'var(--color-forest-dark)' }}>{s.label}</span>
+                
+                <div style={{ marginTop: '10px' }}>
+                  <span style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: isActive || isCompleted || isDelivered ? 'bold' : 'normal',
+                    color: textColor
+                  }}>
+                    {step.label}
+                  </span>
+                  <span style={{
+                    display: 'block',
+                    fontSize: '0.68rem',
+                    color: '#9ca3af',
+                    marginTop: '2px'
+                  }}>
+                    {step.desc}
+                  </span>
+                </div>
               </div>
             );
           })}
-        </div>
 
+        </div>
       </div>
     );
   };
@@ -586,9 +731,10 @@ export const Account: React.FC = () => {
                           onChange={(e) => setPayMethod(e.target.value)}
                           style={{ width: '100%', padding: '10px', border: '1.5px solid var(--color-border)', borderRadius: '4px', backgroundColor: '#fff' }}
                         >
-                          <option value="bKash">bKash (বিকাশ)</option>
-                          <option value="Nagad">Nagad (নগদ)</option>
-                          <option value="Rocket">Rocket (রকেট)</option>
+                          <option value="bkash">bKash (বিকাশ)</option>
+                          <option value="nagad">Nagad (নগদ)</option>
+                          <option value="rocket">Rocket (রকেট)</option>
+                          <option value="bank_transfer">Bank Transfer</option>
                           <option value="Bank">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
                         </select>
                       </div>
@@ -658,13 +804,14 @@ export const Account: React.FC = () => {
                         borderRadius: 'var(--border-radius-lg)', 
                         border: '1.5px solid var(--color-border)', 
                         boxShadow: '0 6px 15px var(--color-shadow)',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        marginBottom: '10px'
                       }}
                     >
                       {/* Order main bar */}
                       <div style={{ 
                         backgroundColor: 'var(--color-sand)', 
-                        padding: '15px 25px', 
+                        padding: '18px 25px', 
                         display: 'flex', 
                         justifyContent: 'space-between', 
                         alignItems: 'center',
@@ -673,19 +820,19 @@ export const Account: React.FC = () => {
                         gap: '15px'
                       }}>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>অর্ডার তারিখ:</span>
-                          <strong style={{ fontSize: '0.9rem' }}>{new Date(order.created_at).toLocaleDateString('bn-BD')}</strong>
+                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>অর্ডার তারিখ ও সময়:</span>
+                          <strong style={{ fontSize: '0.9rem' }}>{new Date(order.created_at).toLocaleString('bn-BD')}</strong>
                         </div>
                         <div>
                           <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>অর্ডার নম্বর:</span>
                           <strong style={{ fontSize: '0.9rem', color: 'var(--color-forest-dark)' }}>#{order.transaction_id}</strong>
                         </div>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>মোট মূল্য:</span>
-                          <strong style={{ fontSize: '1rem', color: 'var(--color-mangrove)' }}>৳{order.total}</strong>
+                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>সর্বমোট মূল্য:</span>
+                          <strong style={{ fontSize: '1.1rem', color: 'var(--color-mangrove)' }}>৳{order.total}</strong>
                         </div>
-                        <div>
-                          {order.order_status === 'pending_payment' && (
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          {((order.order_status === 'pending' || order.order_status === 'pending_payment' || order.order_status === 'payment_rejected' || order.order_status === 'correction_requested') && order.payment_method !== 'cod') && (
                             <button 
                               onClick={() => {
                                 setSubmittingPaymentOrderId(order.id);
@@ -697,32 +844,112 @@ export const Account: React.FC = () => {
                               <DollarSign size={15} /> পেমেন্ট করুন
                             </button>
                           )}
+                          <Link
+                            to={`/account/orders/${order.transaction_id}`}
+                            className="btn btn-outline"
+                            style={{ padding: '8px 15px', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-block' }}
+                          >
+                            Full Order Page
+                          </Link>
                         </div>
                       </div>
 
-                      {/* Details & Roadmap stepper */}
                       <div style={{ padding: '25px' }}>
-                        
-                        {/* Order Status Stepper */}
-                        {getStatusStepperHtml(order.order_status)}
-
-                        {/* Items list detail preview */}
-                        <div style={{ marginTop: '25px', borderTop: '1px solid var(--color-border)', paddingTop: '20px' }}>
-                          <h4 style={{ fontSize: '0.95rem', color: 'var(--color-mud)', fontWeight: 'bold', marginBottom: '15px' }}>📦 পণ্যের তালিকা:</h4>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {(order.order_items || []).map((item: any) => (
-                              <div key={item.id} style={{ display: 'flex', gap: '15px', alignItems: 'center', borderBottom: '1px solid var(--color-sand)', paddingBottom: '10px' }}>
-                                <img src={getImageUrl(item.products?.img)} alt="" style={{ width: '50px', height: '50px', objectFit: 'contain', backgroundColor: 'var(--color-sand)', borderRadius: '4px' }} />
-                                <div style={{ flexGrow: 1 }}>
-                                  <strong style={{ fontSize: '0.92rem', color: 'var(--color-forest-dark)', display: 'block' }}>{item.products?.title}</strong>
-                                  <span style={{ fontSize: '0.8rem', color: 'gray' }}>ওজন: {item.products?.weight} | পরিমাণ: {item.quantity}টি</span>
-                                </div>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>৳{item.price_num * item.quantity}</span>
-                              </div>
-                            ))}
-                          </div>
+                        {/* Status Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '25px' }}>
+                          {[
+                            { label: 'Order Status', value: order.order_status },
+                            { label: 'Payment Status', value: order.payment_status },
+                            { label: 'Shipping Status', value: order.order_status },
+                            { label: 'Grand Total', value: `৳${order.total}` }
+                          ].map(field => (
+                            <div key={field.label} style={{ background: 'var(--color-sand)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '12px 14px' }}>
+                              <span style={{ display: 'block', color: 'gray', fontSize: '0.76rem' }}>{field.label}</span>
+                              <strong style={{ color: 'var(--color-forest-dark)', fontSize: '0.92rem', textTransform: 'capitalize' }}>
+                                {field.value === 'cod' ? 'Cash on Delivery' : field.value}
+                              </strong>
+                            </div>
+                          ))}
                         </div>
 
+                        {/* Timeline / Stepper */}
+                        {getStatusStepperHtml(order)}
+
+                        {/* Product and Details Grid */}
+                        <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '25px', borderTop: '1px solid #f0f0f0', paddingTop: '20px' }}>
+                          
+                          {/* Products List */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <h4 style={{ margin: '0 0 5px 0', color: 'var(--color-forest-dark)', fontSize: '1rem', borderBottom: '2.5px solid var(--color-honey-glow)', paddingBottom: '6px', width: 'fit-content' }}>
+                              📦 অর্ডারকৃত পণ্যসমূহ
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              {(order.order_items || []).map((item: any) => {
+                                const sku = item.products?.sku || item.product_id || item.products?.id || 'N/A';
+                                const subtotal = Number(item.price_num || 0) * Number(item.quantity || 0);
+                                return (
+                                  <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '54px 1fr auto', gap: '12px', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
+                                    <img 
+                                      src={getImageUrl(item.products?.img)} 
+                                      alt={item.products?.title} 
+                                      style={{ width: '54px', height: '54px', objectFit: 'contain', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #ddd' }} 
+                                    />
+                                    <div>
+                                      <strong style={{ display: 'block', color: 'var(--color-forest-dark)', fontSize: '0.9rem' }}>{item.products?.title || 'Unknown Product'}</strong>
+                                      <span style={{ color: 'gray', fontSize: '0.78rem', display: 'block', marginTop: '2px' }}>
+                                        ক্যাটাগরি: {item.products?.category || 'N/A'} · ওজন/সাইজ: {item.products?.weight || 'N/A'} · SKU: {sku}
+                                      </span>
+                                      <span style={{ fontSize: '0.8rem', color: 'var(--color-charcoal-light)' }}>
+                                        পরিমাণ: {item.quantity} x ৳{item.price_num}
+                                      </span>
+                                    </div>
+                                    <strong style={{ color: 'var(--color-mangrove)', fontSize: '0.9rem' }}>৳{subtotal}</strong>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Customer & Address & Pricing Details */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                            {/* Delivery Info */}
+                            <div style={{ background: '#fafafa', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
+                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>📍 ডেলিভারি ও যোগাযোগ তথ্য</h5>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
+                                <div><strong>নাম:</strong> {order.customer_name}</div>
+                                <div><strong>মোবাইল:</strong> {order.phone}</div>
+                                <div><strong>ঠিকানা:</strong> {order.address}</div>
+                                <div><strong>জেলা:</strong> {order.city}</div>
+                                <div><strong>ডেলিভারি নোট:</strong> {order.notes || 'N/A'}</div>
+                              </div>
+                            </div>
+
+                            {/* Payment Info */}
+                            <div style={{ background: '#fafafa', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
+                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>💳 পেমেন্ট বিবরণী</h5>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
+                                <div><strong>মাধ্যম:</strong> <span style={{ textTransform: 'uppercase' }}>{order.payment_method}</span></div>
+                                <div><strong>পেমেন্ট স্ট্যাটাস:</strong> {order.payment_status}</div>
+                                <div><strong>Transaction ID:</strong> {order.payments?.[0]?.transaction_id || 'N/A'}</div>
+                                <div><strong>পেমেন্ট তারিখ:</strong> {order.payments?.[0]?.payment_date ? new Date(order.payments[0].payment_date).toLocaleString('bn-BD') : 'N/A'}</div>
+                              </div>
+                            </div>
+
+                            {/* Pricing Breakdown */}
+                            <div style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
+                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>💰 বিলিং বিবরণ</h5>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>উপমোট মূল্য:</span><span>৳{order.subtotal}</span></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>ডেলিভারি চার্জ:</span><span>৳{order.shipping_cost}</span></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>ডিসকাউন্ট:</span><span>৳0</span></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', color: 'var(--color-mangrove)', borderTop: '1px dashed var(--color-border)', paddingTop: '6px', marginTop: '4px', fontSize: '0.9rem' }}>
+                                  <span>সর্বমোট:</span><span>৳{order.total}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
                       </div>
 
                     </div>
