@@ -12,6 +12,14 @@
     </script>
     <!-- End Google Tag Manager -->
 
+    <!-- Clean up index.html from URL -->
+    <script>
+      if (window.location.pathname.endsWith('/index.html')) {
+        const cleanPath = window.location.pathname.slice(0, -10) || '/';
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    </script>
+
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -61,8 +69,8 @@
       "priceRange": "$$"
     }
     </script>
-    <script type="module" crossorigin src="/assets/index-I39H9M-G.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CQxYOAW0.css">
+    <script type="module" crossorigin src="/assets/index--ps58Llk.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-bLkTG9qx.css">
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
