@@ -23,7 +23,7 @@ const useAuthStatus = () => {
 
     checkUserType();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       checkUserType();
     });
 
