@@ -1056,8 +1056,8 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 বরফ শীতল সতেজ ডেলিভারি`,desc:`শ্যামনগরের লোনা ঘের থেকে তুলে দ্রুততম ডেলিভারি ব্যবস্থা।`}],[w,ee]=(0,x.useState)(0);return(0,x.useEffect)(()=>{let e=setInterval(()=>{ee(e=>(e+1)%C.length)},5e3);return()=>clearInterval(e)},[C.length]),(0,R.jsxs)(R.Fragment,{children:[(0,R.jsxs)(ze,{children:[(0,R.jsx)(`title`,{children:`সুন্দরবন হাট - সুন্দরবনের খাঁটি স্বাদ, সরাসরি আপনার ঘরে`}),(0,R.jsx)(`meta`,{name:`description`,content:`সুন্দরবন হাট (Sundarban Hat) - শ্যামনগর, সাতক্ষীরা থেকে সরাসরি সংগৃহীত ১০০% খাঁটি খলিশা মধু, তাজা বাগদা চিংড়ি, কাঠের ঘানির সরিষার তেল এবং উপকূলীয় খাঁটি খাদ্যপণ্য।`}),(0,R.jsx)(`meta`,{name:`keywords`,content:`সুন্দরবন হাট, খলিশা মধু, সুন্দরবনের মধু, চিংড়ি, বাগদা চিংড়ি, ঘানির সরিষার তেল, সাতক্ষীরার আম, অর্গানিক ফুড, উপকূলীয় খাদ্য`}),(0,R.jsx)(`link`,{rel:`canonical`,href:`https://sundarbanhat.com/`}),(0,R.jsx)(`script`,{type:`application/ld+json`,children:JSON.stringify(S)})]}),(0,R.jsxs)(`section`,{className:`sh-hero-slider`,children:[(0,R.jsx)(`style`,{children:`
           .sh-hero-slider {
             position: relative;
-            height: clamp(280px, 45vh, 340px);
-            max-height: 380px;
+            height: clamp(420px, 65vh, 600px);
+            max-height: 640px;
             overflow: hidden;
             color: #FFFFFF;
             font-family: 'Hind Siliguri', sans-serif;
@@ -1087,44 +1087,40 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 20px 16px 24px;
-            max-width: 680px;
+            padding: 40px 24px 50px;
+            max-width: 760px;
             margin: 0 auto;
           }
           .sh-hero-logo {
-            width: clamp(80px, 20vw, 110px);
-            max-height: 48px;
+            width: clamp(90px, 18vw, 130px);
+            max-height: 64px;
             object-fit: contain;
-            margin-bottom: 8px;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+            margin-bottom: 14px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
           }
           .sh-hero-tag {
-            font-size: 0.8rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--color-honey);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
           }
           .sh-hero-heading {
-            font-size: clamp(1.45rem, 5.2vw, 2.1rem);
+            font-size: clamp(1.8rem, 5.5vw, 2.9rem);
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.25;
             color: #FFFFFF;
-            margin-bottom: 6px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            margin-bottom: 12px;
+            text-shadow: 0 3px 16px rgba(0,0,0,0.45);
             white-space: pre-line;
           }
           .sh-hero-sub {
-            font-size: clamp(0.82rem, 3vw, 0.95rem);
+            font-size: clamp(0.92rem, 2.8vw, 1.08rem);
             color: #E2E8F0;
-            margin-bottom: 14px;
-            line-height: 1.35;
-            max-width: 520px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            max-width: 580px;
           }
           .sh-hero-btns {
             display: flex;
@@ -1136,39 +1132,39 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
           .sh-hero-btn-main {
             background: linear-gradient(135deg, #2E7D32, #15803D);
             color: #FFFFFF;
-            padding: 10px 22px;
+            padding: 13px 28px;
             border-radius: 99px;
             font-weight: 800;
-            font-size: 0.92rem;
+            font-size: 1rem;
             text-decoration: none;
-            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.4);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.45);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             transition: all 0.2s ease;
           }
           .sh-hero-btn-sec {
             background: rgba(255, 255, 255, 0.18);
             backdrop-filter: blur(8px);
             color: #FFFFFF;
-            padding: 10px 20px;
+            padding: 13px 24px;
             border-radius: 99px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.35);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
           }
           .sh-hero-dots {
             position: absolute;
-            bottom: 10px;
+            bottom: 18px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 4;
             display: flex;
-            gap: 6px;
+            gap: 8px;
           }
           .sh-hero-dot {
             width: 8px;
