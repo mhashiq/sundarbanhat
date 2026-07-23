@@ -146,8 +146,8 @@ export const Home: React.FC = () => {
         <style>{`
           .sh-hero-slider {
             position: relative;
-            height: clamp(420px, 65vh, 600px);
-            max-height: 640px;
+            height: clamp(520px, 90vh, 820px);
+            max-height: 900px;
             overflow: hidden;
             color: #FFFFFF;
             font-family: 'Hind Siliguri', sans-serif;
@@ -249,27 +249,32 @@ export const Home: React.FC = () => {
           }
           .sh-hero-dots {
             position: absolute;
-            bottom: 18px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 4;
+            z-index: 10;
             display: flex;
             gap: 8px;
+            background: rgba(0,0,0,0.25);
+            padding: 6px 12px;
+            border-radius: 99px;
+            backdrop-filter: blur(4px);
           }
           .sh-hero-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            border: none;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255,255,255,0.7);
             cursor: pointer;
             transition: all 0.3s ease;
             padding: 0;
           }
           .sh-hero-dot.active {
-            width: 22px;
+            width: 28px;
             border-radius: 99px;
             background: #FFFFFF;
+            border-color: #FFFFFF;
           }
         `}</style>
 
