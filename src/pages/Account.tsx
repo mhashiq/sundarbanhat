@@ -10,13 +10,10 @@ import {
   Edit3, 
   Plus, 
   Trash2, 
-  DollarSign, 
   Upload,
   CheckCircle,
-  AlertCircle,
-  Check
+  AlertCircle
 } from 'lucide-react';
-import { getImageUrl } from '../services/dataService';
 import { dataService } from '../services/dataService';
 import type { Product } from '../services/dataService';
 import { trackPurchase } from '../analytics/analytics';
@@ -422,183 +419,6 @@ export const Account: React.FC = () => {
     }
   };
 
-  const getStatusStepperHtml = (order: any) => {
-    const status = order.order_status;
-    const history = order.order_status_history || [];
-
-    if (status === 'Order Cancelled') {
-      return (
-        <div style={{ 
-          background: '#fef2f2', 
-          border: '1.5px solid #fecaca', 
-          borderRadius: '12px', 
-          padding: '20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '15px',
-          boxShadow: '0 4px 10px rgba(239, 68, 68, 0.05)',
-          marginBottom: '20px'
-        }}>
-          <div style={{ background: '#ef4444', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <AlertCircle size={22} />
-          </div>
-          <div>
-            <h4 style={{ margin: 0, color: '#991b1b', fontSize: '1.05rem', fontWeight: 'bold' }}>অর্ডার বাতিল করা হয়েছে (Order Cancelled)</h4>
-            <p style={{ margin: '4px 0 0 0', color: '#7f1d1d', fontSize: '0.85rem', lineHeight: '1.4' }}>
-              এই অর্ডারটি বাতিল করা হয়েছে। কোনো জিজ্ঞাসা থাকলে আমাদের কাস্টমার সার্ভিসের সাথে যোগাযোগ করুন।
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    if (status === 'Refunded') {
-      const refundEntry = history.find((h: any) => h.status === 'Refunded');
-      const refundDate = refundEntry ? new Date(refundEntry.created_at).toLocaleDateString('bn-BD') : 'N/A';
-      return (
-        <div style={{ 
-          background: '#fff7ed', 
-          border: '1.5px solid #ffedd5', 
-          borderRadius: '12px', 
-          padding: '20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '15px',
-          boxShadow: '0 4px 10px rgba(249, 115,  orange, 0.05)',
-          marginBottom: '20px'
-        }}>
-          <div style={{ background: '#f97316', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <AlertCircle size={22} />
-          </div>
-          <div>
-            <h4 style={{ margin: 0, color: '#9a3412', fontSize: '1.05rem', fontWeight: 'bold' }}>টাকা ফেরত দেওয়া হয়েছে (Refunded)</h4>
-            <p style={{ margin: '4px 0 0 0', color: '#7c2d12', fontSize: '0.85rem', lineHeight: '1.4' }}>
-              আপনার পেমেন্ট রিফান্ড সম্পন্ন হয়েছে। রিফান্ড তারিখ: <strong>{refundDate}</strong>।
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    const steps = [
-      { key: 'Order Placed', label: 'অর্ডার প্লেসড', desc: 'Order Placed' },
-      { key: 'Payment Confirmed', label: 'পেমেন্ট কনফার্মড', desc: 'Payment Confirmed' },
-      { key: 'Order Packing', label: 'অর্ডার প্যাকিং', desc: 'Order Packing' },
-      { key: 'Order Shipping', label: 'অর্ডার শিপিং', desc: 'Order Shipping' },
-      { key: 'Order Delivered', label: 'অর্ডার ডেলিভার্ড', desc: 'Order Delivered' }
-    ];
-
-    const currentIdx = steps.findIndex(s => s.key === status);
-    const activeIdx = currentIdx === -1 ? 0 : currentIdx;
-
-    return (
-      <div style={{ marginBottom: '30px', background: '#fff', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '24px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', position: 'relative' }}>
-          
-          {/* Stepper Line background */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            left: '5%',
-            right: '5%',
-            height: '4px',
-            background: '#e5e7eb',
-            zIndex: 1,
-            borderRadius: '2px'
-          }} />
-
-          {/* Stepper Progress filled line */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            left: '5%',
-            width: `${(activeIdx / (steps.length - 1)) * 90}%`,
-            height: '4px',
-            background: 'linear-gradient(to right, #22c55e, #3b82f6)',
-            zIndex: 1,
-            borderRadius: '2px',
-            transition: 'width 0.6s ease-in-out'
-          }} />
-
-          {steps.map((step, idx) => {
-            const isCompleted = idx < activeIdx;
-            const isActive = idx === activeIdx;
-            const isDelivered = status === 'Order Delivered' && idx === 4;
-            const isCurrentOrCompleted = idx <= activeIdx;
-
-            let bubbleBg = '#f3f4f6';
-            let borderStyle = '2px solid #e5e7eb';
-            let textColor = '#9ca3af';
-
-            if (isCompleted || isDelivered) {
-              bubbleBg = '#dcfce7';
-              borderStyle = '2px solid #22c55e';
-              textColor = '#166534';
-            } else if (isActive) {
-              bubbleBg = '#dbeafe';
-              borderStyle = '2px solid #3b82f6';
-              textColor = '#1e40af';
-            }
-
-            return (
-              <div key={step.key} style={{
-                position: 'relative',
-                zIndex: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                flex: '1',
-                textAlign: 'center',
-                minWidth: '100px'
-              }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: bubbleBg,
-                  border: borderStyle,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                  color: isCurrentOrCompleted ? '#fff' : '#9ca3af',
-                  transition: 'all 0.3s ease',
-                  boxShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.4)' : 'none'
-                }}>
-                  {isCompleted || isDelivered ? (
-                    <Check size={18} color="#22c55e" style={{ strokeWidth: 3 }} />
-                  ) : (
-                    <span style={{ color: isActive ? '#3b82f6' : '#9ca3af', fontSize: '0.9rem' }}>{idx + 1}</span>
-                  )}
-                </div>
-                
-                <div style={{ marginTop: '10px' }}>
-                  <span style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: isActive || isCompleted || isDelivered ? 'bold' : 'normal',
-                    color: textColor
-                  }}>
-                    {step.label}
-                  </span>
-                  <span style={{
-                    display: 'block',
-                    fontSize: '0.68rem',
-                    color: '#9ca3af',
-                    marginTop: '2px'
-                  }}>
-                    {step.desc}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-
-        </div>
-      </div>
-    );
-  };
-
   return (
     <section className="section" style={{ backgroundColor: 'var(--color-sand)', minHeight: '90vh', padding: '0px' }}>
       <Helmet>
@@ -790,174 +610,128 @@ export const Account: React.FC = () => {
               )}
 
               {/* Order logs card list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+              <div className="sh-orders-list">
                 {orders.length === 0 ? (
-                  <div style={{ background: '#fff', padding: '40px', borderRadius: 'var(--border-radius-lg)', textAlign: 'center', color: 'gray', border: '1px solid var(--color-border)' }}>
-                    আপনি এখনও কোনো অর্ডার করেননি। পণ্য কিনতে আমাদের <Link to="/products" style={{ color: 'var(--color-mangrove)', fontWeight: 'bold', textDecoration: 'underline' }}>শপে যান</Link>।
+                  <div className="sh-orders-empty">
+                    <div className="empty-icon">📦</div>
+                    <p>
+                      আপনি এখনও কোনো অর্ডার করেননি।<br />
+                      পণ্য কিনতে আমাদের{' '}
+                      <Link to="/products" style={{ color: 'var(--color-mangrove)', fontWeight: 'bold', textDecoration: 'underline' }}>
+                        শপে যান
+                      </Link>।
+                    </p>
                   </div>
                 ) : (
-                  orders.map(order => (
-                    <div 
-                      key={order.id} 
-                      style={{ 
-                        background: '#fff', 
-                        borderRadius: 'var(--border-radius-lg)', 
-                        border: '1.5px solid var(--color-border)', 
-                        boxShadow: '0 6px 15px var(--color-shadow)',
-                        overflow: 'hidden',
-                        marginBottom: '10px'
-                      }}
-                    >
-                      {/* Order main bar */}
-                      <div style={{ 
-                        backgroundColor: 'var(--color-sand)', 
-                        padding: '18px 25px', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        borderBottom: '1px solid var(--color-border)',
-                        flexWrap: 'wrap',
-                        gap: '15px'
-                      }}>
-                        <div>
-                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>অর্ডার তারিখ ও সময়:</span>
-                          <strong style={{ fontSize: '0.9rem' }}>{new Date(order.created_at).toLocaleString('bn-BD')}</strong>
+                  orders.map(order => {
+                    const s = (order.order_status || '').toLowerCase();
+                    const statusClass =
+                      s === 'order placed' || s === 'pending_payment' || s === 'pending' ? 'status-placed' :
+                      s === 'processing' || s === 'confirmed' || s === 'order_confirmed' ? 'status-proc' :
+                      s === 'shipped' ? 'status-shipped' :
+                      s === 'out_for_delivery' || s === 'out for delivery' ? 'status-out' :
+                      s === 'delivered' ? 'status-deliv' :
+                      s === 'cancelled' || s === 'rejected' ? 'status-cancel' :
+                      'status-proc';
+
+                    const renderStatusChip = (st: string) => {
+                      const sv = (st || '').toLowerCase();
+                      if (sv === 'order placed' || sv === 'pending_payment' || sv === 'pending')
+                        return <span className="sh-chip chip-placed">✦ Order Placed</span>;
+                      if (sv === 'processing' || sv === 'confirmed' || sv === 'order_confirmed')
+                        return <span className="sh-chip chip-proc">⏳ Processing</span>;
+                      if (sv === 'shipped')
+                        return <span className="sh-chip chip-shipped">🚢 Shipped</span>;
+                      if (sv === 'out_for_delivery' || sv === 'out for delivery')
+                        return <span className="sh-chip chip-out">🛵 Out for Delivery</span>;
+                      if (sv === 'delivered')
+                        return <span className="sh-chip chip-deliv">✅ Delivered</span>;
+                      if (sv === 'cancelled' || sv === 'rejected')
+                        return <span className="sh-chip chip-cancel">✕ Cancelled</span>;
+                      return <span className="sh-chip chip-proc">⏳ {st}</span>;
+                    };
+
+                    const renderPaymentChip = (ps: string, pm: string) => {
+                      const p = (ps || '').toLowerCase();
+                      const m = (pm || '').toLowerCase();
+                      if (p === 'paid' || p === 'verified')
+                        return <span className="sh-chip chip-paid">✓ Paid</span>;
+                      if (m === 'cod')
+                        return <span className="sh-chip chip-cod">🏠 Cash on Delivery</span>;
+                      if (p === 'payment_submitted' || p === 'under_review')
+                        return <span className="sh-chip chip-proc">🔍 Under Review</span>;
+                      return <span className="sh-chip chip-pending">⚠ Pending Payment</span>;
+                    };
+
+                    const needsPayment =
+                      (order.order_status === 'pending' || order.order_status === 'pending_payment' ||
+                       order.order_status === 'payment_rejected' || order.order_status === 'correction_requested') &&
+                      order.payment_method !== 'cod';
+
+                    return (
+                      <div key={order.id} className={`sh-order-card ${statusClass}`}>
+
+                        {/* ── HEADER: Order ID + Date + Status ── */}
+                        <div className="sh-order-header">
+                          <div className="sh-order-id-group">
+                            <span className="sh-order-id">#{order.transaction_id}</span>
+                            <span className="sh-order-date">
+                              {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              {' · '}
+                              {new Date(order.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          {renderStatusChip(order.order_status)}
                         </div>
-                        <div>
-                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>অর্ডার নম্বর:</span>
-                          <strong style={{ fontSize: '0.9rem', color: 'var(--color-forest-dark)' }}>#{order.transaction_id}</strong>
+
+                        {/* ── BODY: Amount + Payment status ── */}
+                        <div className="sh-order-body">
+                          <div>
+                            <div className="sh-order-amount-label">মোট পরিমাণ</div>
+                            <div className="sh-order-amount">৳{Number(order.total).toLocaleString('bn-BD')}</div>
+                          </div>
+                          <div className="sh-order-meta-col">
+                            {renderPaymentChip(order.payment_status, order.payment_method)}
+                          </div>
                         </div>
-                        <div>
-                          <span style={{ fontSize: '0.78rem', color: 'gray', display: 'block' }}>সর্বমোট মূল্য:</span>
-                          <strong style={{ fontSize: '1.1rem', color: 'var(--color-mangrove)' }}>৳{order.total}</strong>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                          {((order.order_status === 'pending' || order.order_status === 'pending_payment' || order.order_status === 'payment_rejected' || order.order_status === 'correction_requested') && order.payment_method !== 'cod') && (
-                            <button 
+
+                        {/* ── FOOTER: Action buttons ── */}
+                        <div className="sh-order-footer">
+                          <Link
+                            to={`/account/orders/${order.transaction_id}`}
+                            className="sh-card-btn sh-card-btn-primary"
+                          >
+                            📦 বিবরণ দেখুন
+                          </Link>
+
+                          <Link
+                            to={`/account/orders/${order.transaction_id}?highlight=1`}
+                            className="sh-card-btn sh-card-btn-secondary"
+                          >
+                            🚚 ট্র্যাক করুন
+                          </Link>
+
+                          {needsPayment && (
+                            <button
                               onClick={() => {
                                 setSubmittingPaymentOrderId(order.id);
                                 setPayAmount(Number(order.total));
                               }}
-                              className="btn btn-primary" 
-                              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 15px', fontSize: '0.85rem' }}
+                              className="sh-card-btn sh-card-btn-pay"
                             >
-                              <DollarSign size={15} /> পেমেন্ট করুন
+                              💳 পেমেন্ট করুন
                             </button>
                           )}
-                          <Link
-                            to={`/account/orders/${order.transaction_id}`}
-                            className="btn btn-outline"
-                            style={{ padding: '8px 15px', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-block' }}
-                          >
-                            Full Order Page
-                          </Link>
                         </div>
+
                       </div>
-
-                      <div style={{ padding: '25px' }}>
-                        {/* Status Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '25px' }}>
-                          {[
-                            { label: 'Order Status', value: order.order_status },
-                            { label: 'Payment Status', value: order.payment_status },
-                            { label: 'Shipping Status', value: order.order_status },
-                            { label: 'Grand Total', value: `৳${order.total}` }
-                          ].map(field => (
-                            <div key={field.label} style={{ background: 'var(--color-sand)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '12px 14px' }}>
-                              <span style={{ display: 'block', color: 'gray', fontSize: '0.76rem' }}>{field.label}</span>
-                              <strong style={{ color: 'var(--color-forest-dark)', fontSize: '0.92rem', textTransform: 'capitalize' }}>
-                                {field.value === 'cod' ? 'Cash on Delivery' : field.value}
-                              </strong>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Timeline / Stepper */}
-                        {getStatusStepperHtml(order)}
-
-                        {/* Product and Details Grid */}
-                        <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '25px', borderTop: '1px solid #f0f0f0', paddingTop: '20px' }}>
-                          
-                          {/* Products List */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            <h4 style={{ margin: '0 0 5px 0', color: 'var(--color-forest-dark)', fontSize: '1rem', borderBottom: '2.5px solid var(--color-honey-glow)', paddingBottom: '6px', width: 'fit-content' }}>
-                              📦 অর্ডারকৃত পণ্যসমূহ
-                            </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                              {(order.order_items || []).map((item: any) => {
-                                const sku = item.products?.sku || item.product_id || item.products?.id || 'N/A';
-                                const subtotal = Number(item.price_num || 0) * Number(item.quantity || 0);
-                                return (
-                                  <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '54px 1fr auto', gap: '12px', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
-                                    <img 
-                                      src={getImageUrl(item.products?.img)} 
-                                      alt={item.products?.title} 
-                                      style={{ width: '54px', height: '54px', objectFit: 'contain', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #ddd' }} 
-                                    />
-                                    <div>
-                                      <strong style={{ display: 'block', color: 'var(--color-forest-dark)', fontSize: '0.9rem' }}>{item.products?.title || 'Unknown Product'}</strong>
-                                      <span style={{ color: 'gray', fontSize: '0.78rem', display: 'block', marginTop: '2px' }}>
-                                        ক্যাটাগরি: {item.products?.category || 'N/A'} · ওজন/সাইজ: {item.products?.weight || 'N/A'} · SKU: {sku}
-                                      </span>
-                                      <span style={{ fontSize: '0.8rem', color: 'var(--color-charcoal-light)' }}>
-                                        পরিমাণ: {item.quantity} x ৳{item.price_num}
-                                      </span>
-                                    </div>
-                                    <strong style={{ color: 'var(--color-mangrove)', fontSize: '0.9rem' }}>৳{subtotal}</strong>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Customer & Address & Pricing Details */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                            {/* Delivery Info */}
-                            <div style={{ background: '#fafafa', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
-                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>📍 ডেলিভারি ও যোগাযোগ তথ্য</h5>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
-                                <div><strong>নাম:</strong> {order.customer_name}</div>
-                                <div><strong>মোবাইল:</strong> {order.phone}</div>
-                                <div><strong>ঠিকানা:</strong> {order.address}</div>
-                                <div><strong>জেলা:</strong> {order.city}</div>
-                                <div><strong>ডেলিভারি নোট:</strong> {order.notes || 'N/A'}</div>
-                              </div>
-                            </div>
-
-                            {/* Payment Info */}
-                            <div style={{ background: '#fafafa', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
-                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>💳 পেমেন্ট বিবরণী</h5>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
-                                <div><strong>মাধ্যম:</strong> <span style={{ textTransform: 'uppercase' }}>{order.payment_method}</span></div>
-                                <div><strong>পেমেন্ট স্ট্যাটাস:</strong> {order.payment_status}</div>
-                                <div><strong>Transaction ID:</strong> {order.payments?.[0]?.transaction_id || 'N/A'}</div>
-                                <div><strong>পেমেন্ট তারিখ:</strong> {order.payments?.[0]?.payment_date ? new Date(order.payments[0].payment_date).toLocaleString('bn-BD') : 'N/A'}</div>
-                              </div>
-                            </div>
-
-                            {/* Pricing Breakdown */}
-                            <div style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '15px' }}>
-                              <h5 style={{ margin: '0 0 10px 0', color: 'var(--color-forest-dark)', fontSize: '0.9rem', fontWeight: 'bold' }}>💰 বিলিং বিবরণ</h5>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#555' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>উপমোট মূল্য:</span><span>৳{order.subtotal}</span></div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>ডেলিভারি চার্জ:</span><span>৳{order.shipping_cost}</span></div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>ডিসকাউন্ট:</span><span>৳0</span></div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', color: 'var(--color-mangrove)', borderTop: '1px dashed var(--color-border)', paddingTop: '6px', marginTop: '4px', fontSize: '0.9rem' }}>
-                                  <span>সর্বমোট:</span><span>৳{order.total}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                        </div>
-                      </div>
-
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
           )}
+
 
           {/* TAB 2: ADDRESS BOOK */}
           {activeTab === 'addresses' && (

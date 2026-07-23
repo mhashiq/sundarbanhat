@@ -52,10 +52,19 @@ export interface OrderInput {
   total: number;
   payment_method: PaymentMethod;
   notes?: string;
+  customer_id?: string;
 }
 
 export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'rocket' | 'bank_transfer';
 export type OrderSource = 'Website' | 'Facebook' | 'Instagram' | 'TikTok' | 'WhatsApp' | 'Messenger' | 'Phone Call' | 'Walk-in Customer' | 'Other';
+
+export const mapPaymentMethodForConstraint = (method: string): string => {
+  if (!method) return 'cod';
+  const lower = method.toLowerCase();
+  if (lower === 'cod' || lower === 'bkash') return lower;
+  if (lower.includes('bkash') || lower.includes('nagad') || lower.includes('rocket')) return 'bkash';
+  return 'cod';
+};
 
 export interface AdminOrderSummaryRecord {
   id: string;
@@ -71,6 +80,7 @@ export interface AdminOrderSummaryRecord {
   order_source: OrderSource | string;
   created_at: string;
   updated_at?: string;
+  deleted_at?: string | null;
   products_count?: number;
   due_amount?: number;
   total_paid_amount?: number;
@@ -136,6 +146,7 @@ export interface DetailedOrderRecord {
   payment_notes?: string | null;
   internal_notes?: string | null;
   notes?: string | null;
+  deleted_at?: string | null;
   created_at: string;
   updated_at?: string;
   order_items?: Array<{
@@ -147,6 +158,16 @@ export interface DetailedOrderRecord {
   }>;
   payments?: PaymentRecord[];
   order_status_history?: OrderStatusHistoryRecord[];
+}
+
+export interface CustomerAddress {
+  id: string;
+  customer_id: string;
+  address_line: string;
+  city: string;
+  district: string;
+  is_default: boolean;
+  created_at?: string;
 }
 
 export interface AdminOrderLoadResult {
@@ -232,6 +253,35 @@ const staticFaqs: Faq[] = [
   }
 ];
 
+const isMissingColumnError = (error: any, colName: string): boolean => {
+  if (!error) return false;
+  const msg = (error.message || '').toLowerCase();
+  return msg.includes(colName.toLowerCase()) || msg.includes('does not exist') || error.code === '42703';
+};
+
+const mapStatusForCheckConstraint = (status?: string): string => {
+  if (!status) return 'pending_payment';
+  const statusMap: Record<string, string> = {
+    'Order Placed': 'pending_payment',
+    'Payment Confirmed': 'order_confirmed',
+    'Order Packing': 'processing',
+    'Order Shipping': 'shipped',
+    'Order Delivered': 'delivered',
+    'Order Cancelled': 'cancelled',
+    'under_review': 'payment_submitted'
+  };
+  return statusMap[status] || status;
+};
+
+const mapOrderSourceForCheckConstraint = (source?: string): string => {
+  if (!source) return 'Website';
+  const map: Record<string, string> = {
+    'Phone Call': 'Phone',
+    'Other': 'Referral'
+  };
+  return map[source] || 'Website';
+};
+
 // Unified Data Service layer communicating with Supabase
 export const dataService = {
   normalizeOrderStatus(status?: string): string {
@@ -281,7 +331,6 @@ export const dataService = {
       return [];
     }
     
-    // Map database fields to front-end camelCase / exact shapes
     return (data || []).map(p => ({
       id: p.id,
       title: p.title,
@@ -350,8 +399,47 @@ export const dataService = {
     return data || [];
   },
 
-  // 4. Create checkout order (transacts order metadata & order items sequential)
+  // 4. Create checkout order (Attempts transactional RPC first, falls back to safe sequential insert)
   async createOrder(order: any, items: OrderItemInput[]): Promise<string> {
+    const orderPayload = {
+      transaction_id: order.transaction_id,
+      customer_id: order.customer_id || null,
+      customer_name: order.customer_name,
+      phone: order.phone,
+      email: order.email || null,
+      address: order.address,
+      city: order.city,
+      shipping_cost: order.shipping_cost,
+      subtotal: order.subtotal,
+      total: order.total,
+      payment_method: order.payment_method,
+      order_status: order.order_status || 'pending_payment',
+      payment_status: order.payment_status || 'pending_payment',
+      order_source: order.order_source || 'Website',
+      notes: order.notes || null
+    };
+
+    const itemsPayload = items.map(item => ({
+      product_id: item.product.id,
+      quantity: item.quantity,
+      price_num: item.product.priceNum
+    }));
+
+    // Attempt transactional RPC creation
+    try {
+      const { data: rpcOrderId, error: rpcError } = await supabase.rpc('create_order_with_items', {
+        p_order: orderPayload,
+        p_items: itemsPayload
+      });
+
+      if (!rpcError && rpcOrderId) {
+        return rpcOrderId as string;
+      }
+    } catch (e) {
+      console.warn('RPC create_order_with_items unavailable, falling back to sequential order insertion:', e);
+    }
+
+    // Fallback: Sequential Insert
     const basePayload = {
       transaction_id: order.transaction_id,
       customer_name: order.customer_name,
@@ -364,15 +452,26 @@ export const dataService = {
       total: order.total,
       payment_method: order.payment_method,
       notes: order.notes || null,
-      customer_id: order.customer_id || null
+      customer_id: order.customer_id || null,
+      order_source: order.order_source || 'Website'
+    };
+
+    const mappedPaymentMethod = mapPaymentMethodForConstraint(order.payment_method);
+    const fallbackBasePayload = {
+      ...basePayload,
+      payment_method: mappedPaymentMethod
     };
 
     const orderInsertVariants = [
+      { ...basePayload, order_status: 'pending_payment', payment_status: 'pending_payment' },
       { ...basePayload, order_status: 'Order Placed', payment_status: 'pending_payment' },
-      basePayload
+      basePayload,
+      { ...fallbackBasePayload, order_status: 'pending_payment', payment_status: 'pending_payment' },
+      { ...fallbackBasePayload, order_status: 'Order Placed', payment_status: 'pending_payment' },
+      fallbackBasePayload
     ];
 
-    let data: { id: string } | null = null;
+    let insertedOrder: { id: string } | null = null;
     let lastOrderError: any = null;
 
     for (const payload of orderInsertVariants) {
@@ -383,31 +482,22 @@ export const dataService = {
         .single();
 
       if (!orderError && inserted) {
-        data = inserted as { id: string };
+        insertedOrder = inserted as { id: string };
         lastOrderError = null;
         break;
       }
 
       lastOrderError = orderError;
-
-      const msg = orderError?.message || '';
-      const retryableConstraintError =
-        msg.includes('orders_order_status_check') ||
-        msg.includes('orders_payment_status_check') ||
-        msg.includes('null value in column "order_status"') ||
-        msg.includes('null value in column "payment_status"');
-
-      if (!retryableConstraintError) break;
     }
 
-    if (lastOrderError || !data) {
+    if (lastOrderError || !insertedOrder) {
       console.error('Error placing order metadata:', lastOrderError);
       throw new Error(lastOrderError?.message || 'Failed to place order.');
     }
 
-    const dbOrderId = data.id;
+    const dbOrderId = insertedOrder.id;
 
-    // 4.2 Write items to order_items table referencing the generated order UUID
+    // Write items
     const orderItemsPayload = items.map(item => ({
       order_id: dbOrderId,
       product_id: item.product.id,
@@ -421,20 +511,45 @@ export const dataService = {
 
     if (itemsError) {
       console.error('Error placing order items:', itemsError);
-      // Clean up orphaned order metadata on items failure
-      await supabase.from('orders').delete().eq('id', dbOrderId);
+      try {
+        await supabase.from('orders').delete().eq('id', dbOrderId);
+      } catch {
+        await supabase.from('orders').update({ order_status: 'cancelled', notes: 'Failed item registration' }).eq('id', dbOrderId);
+      }
       throw new Error(itemsError.message || 'Failed to register order items.');
+    }
+
+    // Write initial status history log
+    try {
+      await supabase.from('order_status_history').insert({
+        order_id: dbOrderId,
+        status: orderPayload.order_status,
+        notes: 'Order placed'
+      });
+    } catch {
+      // Ignored if table isn't present
     }
 
     return dbOrderId;
   },
 
   async getCustomerOrders(customerId: string): Promise<DetailedOrderRecord[]> {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
       .eq('customer_id', customerId)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
+
+    if (error && isMissingColumnError(error, 'deleted_at')) {
+      const fallback = await supabase
+        .from('orders')
+        .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+        .eq('customer_id', customerId)
+        .order('created_at', { ascending: false });
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('Error fetching detailed customer orders:', error);
@@ -444,14 +559,47 @@ export const dataService = {
     return (data || []) as DetailedOrderRecord[];
   },
 
-  async getOrderByTransactionId(transactionId: string): Promise<DetailedOrderRecord | null> {
-    const { data, error } = await supabase
+  async getOrderByTransactionId(transactionIdOrId: string): Promise<DetailedOrderRecord | null> {
+    // 1. Try querying by transaction_id
+    let { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
-      .eq('transaction_id', transactionId)
+      .eq('transaction_id', transactionIdOrId)
+      .is('deleted_at', null)
       .maybeSingle();
 
-    if (error) {
+    if (error && isMissingColumnError(error, 'deleted_at')) {
+      const fallback = await supabase
+        .from('orders')
+        .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+        .eq('transaction_id', transactionIdOrId)
+        .maybeSingle();
+      data = fallback.data;
+      error = fallback.error;
+    }
+
+    // 2. If not found by transaction_id, try querying by id (UUID)
+    if (!data) {
+      let idQuery = await supabase
+        .from('orders')
+        .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+        .eq('id', transactionIdOrId)
+        .is('deleted_at', null)
+        .maybeSingle();
+
+      if (idQuery.error && isMissingColumnError(idQuery.error, 'deleted_at')) {
+        idQuery = await supabase
+          .from('orders')
+          .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+          .eq('id', transactionIdOrId)
+          .maybeSingle();
+      }
+      if (idQuery.data) {
+        data = idQuery.data;
+      }
+    }
+
+    if (error && !data) {
       console.error('Error fetching detailed order:', error);
       return null;
     }
@@ -460,10 +608,20 @@ export const dataService = {
   },
 
   async getAdminOrders(): Promise<AdminOrderLoadResult> {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
+
+    if (error && isMissingColumnError(error, 'deleted_at')) {
+      const fallback = await supabase
+        .from('orders')
+        .select('*, order_items(*, products(*)), payments(*), order_status_history(*)')
+        .order('created_at', { ascending: false });
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('Error fetching admin orders:', error);
@@ -477,11 +635,22 @@ export const dataService = {
   },
 
   async getAdminOrderById(orderId: string): Promise<AdminOrderDetailResult> {
-    const { data: order, error: orderError } = await supabase
+    let { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)
+      .is('deleted_at', null)
       .maybeSingle();
+
+    if (orderError && isMissingColumnError(orderError, 'deleted_at')) {
+      const fallback = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .maybeSingle();
+      order = fallback.data;
+      orderError = fallback.error;
+    }
 
     if (orderError) {
       return { order: null, error: orderError.message };
@@ -512,10 +681,75 @@ export const dataService = {
   },
 
   async updateAdminOrder(orderId: string, payload: Partial<DetailedOrderRecord>): Promise<void> {
-    const { error } = await supabase
+    const cleanPayload: Record<string, any> = { ...payload, updated_at: new Date().toISOString() };
+    delete cleanPayload.order_items;
+    delete cleanPayload.payments;
+    delete cleanPayload.order_status_history;
+    delete cleanPayload.products;
+    delete cleanPayload.id;
+
+    let { error } = await supabase
       .from('orders')
-      .update({ ...payload, updated_at: new Date().toISOString() })
+      .update(cleanPayload)
       .eq('id', orderId);
+
+    // 1. Retry if deleted_at column is missing
+    if (error && isMissingColumnError(error, 'deleted_at')) {
+      delete cleanPayload.deleted_at;
+      delete cleanPayload.deleted_by;
+      const retry = await supabase
+        .from('orders')
+        .update(cleanPayload)
+        .eq('id', orderId);
+      error = retry.error;
+    }
+
+    // 2. Retry with mapped fallback statuses if check constraint fails
+    if (error && (error.message?.includes('orders_order_status_check') || error.message?.includes('orders_payment_status_check') || error.message?.includes('violates check constraint'))) {
+      if (cleanPayload.order_status) {
+        cleanPayload.order_status = mapStatusForCheckConstraint(cleanPayload.order_status);
+      }
+      if (cleanPayload.payment_status) {
+        cleanPayload.payment_status = mapStatusForCheckConstraint(cleanPayload.payment_status);
+      }
+      const retryConstraint = await supabase
+        .from('orders')
+        .update(cleanPayload)
+        .eq('id', orderId);
+      error = retryConstraint.error;
+    }
+
+    // 3. Retry with mapped or stripped order_source if order_source check constraint fails
+    if (error && (error.message?.includes('orders_order_source_check') || error.message?.includes('order_source'))) {
+      if (cleanPayload.order_source) {
+        cleanPayload.order_source = mapOrderSourceForCheckConstraint(cleanPayload.order_source);
+      }
+      let retrySource = await supabase
+        .from('orders')
+        .update(cleanPayload)
+        .eq('id', orderId);
+
+      if (retrySource.error) {
+        delete cleanPayload.order_source;
+        retrySource = await supabase
+          .from('orders')
+          .update(cleanPayload)
+          .eq('id', orderId);
+      }
+      error = retrySource.error;
+    }
+
+    // 4. Retry with mapped payment_method if payment_method check constraint fails
+    if (error && (error.message?.includes('orders_payment_method_check') || error.message?.includes('payment_method'))) {
+      if (cleanPayload.payment_method) {
+        cleanPayload.payment_method = mapPaymentMethodForConstraint(cleanPayload.payment_method);
+      }
+      const retryPayment = await supabase
+        .from('orders')
+        .update(cleanPayload)
+        .eq('id', orderId);
+      error = retryPayment.error;
+    }
 
     if (error) throw new Error(error.message);
   },
@@ -539,11 +773,124 @@ export const dataService = {
   },
 
   async deleteAdminOrder(orderId: string): Promise<void> {
-    const { error } = await supabase.from('orders').delete().eq('id', orderId);
+    // Attempt soft deletion first
+    const { error: softDeleteError } = await supabase
+      .from('orders')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', orderId);
+
+    if (!softDeleteError) return;
+
+    // Fallback to hard delete if soft delete column is missing
+    const { error: hardDeleteError } = await supabase.from('orders').delete().eq('id', orderId);
+    if (hardDeleteError) throw new Error(hardDeleteError.message);
+  },
+
+  // 5. Submit customer payment record and proof file
+  async submitPaymentRecord(params: {
+    orderId: string;
+    paymentMethod: string;
+    transactionId: string;
+    amount: number;
+    proofFile?: File | null;
+    notes?: string;
+  }): Promise<void> {
+    let screenshotUrl: string | null = null;
+
+    if (params.proofFile) {
+      const ext = params.proofFile.name.split('.').pop() || 'png';
+      const path = `${params.orderId}_${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('payment-proofs')
+        .upload(path, params.proofFile, { upsert: true });
+
+      if (!uploadErr) {
+        screenshotUrl = `storage/payment-proofs/${path}`;
+      } else {
+        console.warn('Failed to upload proof screenshot:', uploadErr);
+      }
+    }
+
+    const { data: paymentRow, error: paymentErr } = await supabase
+      .from('payments')
+      .insert({
+        order_id: params.orderId,
+        payment_method: params.paymentMethod,
+        transaction_id: params.transactionId,
+        amount: params.amount,
+        screenshot_url: screenshotUrl,
+        status: 'under_review'
+      })
+      .select('id')
+      .single();
+
+    if (paymentErr) {
+      console.error('Payment insertion error:', paymentErr);
+      throw new Error(paymentErr.message);
+    }
+
+    if (screenshotUrl && paymentRow?.id) {
+      await supabase.from('payment_proofs').insert({
+        payment_id: paymentRow.id,
+        screenshot_url: screenshotUrl,
+        file_name: params.proofFile?.name || 'screenshot',
+        content_type: params.proofFile?.type || 'image/png',
+        notes: params.notes || null
+      });
+    }
+
+    // Update order status to payment submitted / under review
+    await supabase
+      .from('orders')
+      .update({
+        payment_status: 'under_review',
+        order_status: 'payment_submitted',
+        payment_proof_image: screenshotUrl || undefined,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', params.orderId);
+  },
+
+  // 6. Address & Profile Helpers
+  async getCustomerAddresses(customerId: string): Promise<CustomerAddress[]> {
+    const { data, error } = await supabase
+      .from('addresses')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('is_default', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching addresses:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async saveCustomerAddress(address: Partial<CustomerAddress>): Promise<void> {
+    if (address.is_default && address.customer_id) {
+      await supabase
+        .from('addresses')
+        .update({ is_default: false })
+        .eq('customer_id', address.customer_id);
+    }
+
+    const { error } = await supabase
+      .from('addresses')
+      .upsert(address);
+
     if (error) throw new Error(error.message);
   },
 
-  // 5. Submit contact query message
+  async deleteCustomerAddress(addressId: string): Promise<void> {
+    const { error } = await supabase
+      .from('addresses')
+      .delete()
+      .eq('id', addressId);
+
+    if (error) throw new Error(error.message);
+  },
+
+  // 7. Submit contact query message
   async createContactMessage(message: { name: string; phone: string; email?: string; subject?: string; message: string }): Promise<void> {
     const { error } = await supabase
       .from('contact_messages')
@@ -562,17 +909,17 @@ export const dataService = {
     }
   },
 
-  // 6. Fetch reviews (static fallback, can be connected if desired)
+  // 8. Fetch reviews
   async getReviews(): Promise<Review[]> {
     return staticReviews;
   },
 
-  // 7. Fetch FAQs
+  // 9. Fetch FAQs
   async getFaqs(): Promise<Faq[]> {
     return staticFaqs;
   },
 
-  // 8. Fetch dynamic settings
+  // 10. Fetch dynamic settings
   async getSettings(): Promise<Record<string, string>> {
     try {
       const { data, error } = await supabase
@@ -596,7 +943,7 @@ export const dataService = {
     }
   },
 
-  // 9. Update dynamic setting (admin-only)
+  // 11. Update dynamic setting (admin-only)
   async updateSetting(key: string, value: string): Promise<void> {
     const { error } = await supabase
       .from('settings')
@@ -612,8 +959,6 @@ export const getImageUrl = (path: string): string => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
   
-  // If the image is stored in Supabase Storage, it starts with 'storage/'
-  // We resolve the public URL dynamically.
   const storagePath = path.startsWith('storage/') ? path.replace('storage/', '') : path;
   const knownStorageBuckets = ['product-images', 'payment-proofs'];
   const bucket = storagePath.split('/')[0];
@@ -624,7 +969,6 @@ export const getImageUrl = (path: string): string => {
     return data?.publicUrl || '';
   }
 
-  // Fallback to local assets
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   return `${import.meta.env.BASE_URL}${cleanPath}`;
 };

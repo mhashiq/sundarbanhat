@@ -56,7 +56,6 @@ export const AdminOrderEdit: React.FC = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending_payment');
   const [orderSource, setOrderSource] = useState<OrderSource>('Website');
   const [advancePaidAmount, setAdvancePaidAmount] = useState('');
-  const [totalPaidAmount, setTotalPaidAmount] = useState('');
   const [shippingCost, setShippingCost] = useState('');
   const [courierName, setCourierName] = useState('');
   const [courierTrackingNumber, setCourierTrackingNumber] = useState('');
@@ -100,7 +99,6 @@ export const AdminOrderEdit: React.FC = () => {
         setPaymentStatus(loadedOrder.payment_status || 'pending_payment');
         setOrderSource((loadedOrder.order_source || 'Website') as OrderSource);
         setAdvancePaidAmount(String(loadedOrder.advance_paid_amount || 0));
-        setTotalPaidAmount(String(loadedOrder.total_paid_amount || 0));
         setShippingCost(String(loadedOrder.shipping_cost || 0));
         setCourierName(loadedOrder.courier_name || '');
         setCourierTrackingNumber(loadedOrder.courier_tracking_number || '');
@@ -139,9 +137,8 @@ export const AdminOrderEdit: React.FC = () => {
   const totalSubtotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.price_num || 0) * Number(item.quantity || 0), 0), [items]);
   const calculatedShipping = Number(shippingCost || 0);
   const calculatedAdvance = Number(advancePaidAmount || 0);
-  const calculatedTotalPaid = Number(totalPaidAmount || 0);
   const calculatedTotal = totalSubtotal + calculatedShipping;
-  const calculatedDue = Math.max(0, calculatedTotal - calculatedAdvance - calculatedTotalPaid);
+  const calculatedDue = Math.max(0, calculatedTotal - calculatedAdvance);
   const sourceBadge = order ? { ...sourceTone(formatOrderSource(orderSource)) } : null;
   const statusBadge = order ? { ...statusTone(orderStatus) } : null;
   const paymentBadge = order ? { ...statusTone(paymentStatus) } : null;
@@ -175,7 +172,7 @@ export const AdminOrderEdit: React.FC = () => {
         payment_status: paymentStatus,
         order_source: isWebsiteOrder ? 'Website' : orderSource,
         advance_paid_amount: calculatedAdvance,
-        total_paid_amount: calculatedTotalPaid,
+        total_paid_amount: 0,
         due_amount: calculatedDue,
         shipping_cost: calculatedShipping,
         courier_name: courierName.trim() || null,
@@ -346,7 +343,6 @@ export const AdminOrderEdit: React.FC = () => {
                 <div><label style={{ display: 'block', fontWeight: 700, marginBottom: '6px' }}>Search products</label><input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Type product name or category" style={{ width: '100%', padding: '11px 12px', borderRadius: '12px', border: '1px solid #cbd5e1' }} /></div>
                 <div><label style={{ display: 'block', fontWeight: 700, marginBottom: '6px' }}>Shipping</label><input value={shippingCost} onChange={(e) => setShippingCost(e.target.value)} type="number" min="0" style={{ width: '100%', padding: '11px 12px', borderRadius: '12px', border: '1px solid #cbd5e1' }} /></div>
                 <div><label style={{ display: 'block', fontWeight: 700, marginBottom: '6px' }}>Advance paid</label><input value={advancePaidAmount} onChange={(e) => setAdvancePaidAmount(e.target.value)} type="number" min="0" style={{ width: '100%', padding: '11px 12px', borderRadius: '12px', border: '1px solid #cbd5e1' }} /></div>
-                <div><label style={{ display: 'block', fontWeight: 700, marginBottom: '6px' }}>Total paid</label><input value={totalPaidAmount} onChange={(e) => setTotalPaidAmount(e.target.value)} type="number" min="0" style={{ width: '100%', padding: '11px 12px', borderRadius: '12px', border: '1px solid #cbd5e1' }} /></div>
               </div>
 
               <div style={{ marginTop: '14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '16px', display: 'grid', gap: '8px' }}>

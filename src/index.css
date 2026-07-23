@@ -1315,3 +1315,212 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox */
 }
+
+/* ============================================================
+   ORDER CARD — Premium UI
+   ============================================================ */
+
+.sh-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sh-order-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(90, 67, 37, 0.12);
+  box-shadow: 0 2px 12px rgba(7, 34, 17, 0.06);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sh-order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(7, 34, 17, 0.12);
+}
+
+/* Colored left accent bar per status */
+.sh-order-card.status-placed   { border-left: 4px solid #22c55e; }
+.sh-order-card.status-proc     { border-left: 4px solid #f59e0b; }
+.sh-order-card.status-shipped  { border-left: 4px solid #3b82f6; }
+.sh-order-card.status-out      { border-left: 4px solid #8b5cf6; }
+.sh-order-card.status-deliv    { border-left: 4px solid #10b981; }
+.sh-order-card.status-cancel   { border-left: 4px solid #ef4444; }
+
+/* Top header strip */
+.sh-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(90, 67, 37, 0.08);
+}
+
+.sh-order-id-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sh-order-id {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-forest-dark);
+  letter-spacing: 0.5px;
+}
+
+.sh-order-date {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Status chip */
+.sh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.chip-placed   { background: #dcfce7; color: #15803d; }
+.chip-proc     { background: #fef9c3; color: #92400e; }
+.chip-shipped  { background: #dbeafe; color: #1d4ed8; }
+.chip-out      { background: #ede9fe; color: #6d28d9; }
+.chip-deliv    { background: #d1fae5; color: #065f46; }
+.chip-cancel   { background: #fee2e2; color: #b91c1c; }
+.chip-paid     { background: #d1fae5; color: #065f46; }
+.chip-cod      { background: #fff7ed; color: #c2410c; }
+.chip-pending  { background: #fee2e2; color: #b91c1c; }
+
+/* Body */
+.sh-order-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  gap: 12px;
+}
+
+.sh-order-amount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-forest-dark);
+  font-family: var(--font-heading);
+  letter-spacing: -0.5px;
+}
+
+.sh-order-amount-label {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.sh-order-meta-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* Footer actions */
+.sh-order-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid rgba(90, 67, 37, 0.08);
+  flex-wrap: wrap;
+}
+
+.sh-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.sh-card-btn-primary {
+  background: var(--color-forest-dark);
+  color: #fff;
+}
+.sh-card-btn-primary:hover {
+  background: var(--color-mangrove);
+  transform: translateY(-1px);
+}
+
+.sh-card-btn-secondary {
+  background: #f0fdf4;
+  color: var(--color-mangrove);
+  border: 1px solid #bbf7d0;
+}
+.sh-card-btn-secondary:hover {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.sh-card-btn-pay {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  margin-left: auto;
+}
+.sh-card-btn-pay:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+}
+
+/* Empty state */
+.sh-orders-empty {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px dashed rgba(90, 67, 37, 0.2);
+  padding: 60px 40px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.sh-orders-empty .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.sh-orders-empty p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   Responsive tweaks for small screens
+   ============================================================ */
+@media (max-width: 600px) {
+  .sh-order-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sh-order-meta-col {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+

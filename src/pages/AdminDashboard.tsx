@@ -193,7 +193,6 @@ export const AdminDashboard: React.FC = () => {
   const [editCustCity, setEditCustCity] = useState('');
   const [editOrderSource, setEditOrderSource] = useState('Website');
   const [editAdvancePaid, setEditAdvancePaid] = useState('');
-  const [editTotalPaid, setEditTotalPaid] = useState('');
   const [editCourierCollection, setEditCourierCollection] = useState('');
   const [editCourierName, setEditCourierName] = useState('');
   const [editCourierTracking, setEditCourierTracking] = useState('');
@@ -258,7 +257,6 @@ export const AdminDashboard: React.FC = () => {
       setEditCustCity(selectedOrder.city || '');
       setEditOrderSource(selectedOrder.order_source || 'Website');
       setEditAdvancePaid(selectedOrder.advance_paid_amount ? String(selectedOrder.advance_paid_amount) : '');
-      setEditTotalPaid(selectedOrder.total_paid_amount ? String(selectedOrder.total_paid_amount) : '');
       setEditCourierCollection(selectedOrder.courier_collection_amount ? String(selectedOrder.courier_collection_amount) : '');
       setEditCourierName(selectedOrder.courier_name || '');
       setEditCourierTracking(selectedOrder.courier_tracking_number || '');
@@ -951,8 +949,7 @@ export const AdminDashboard: React.FC = () => {
       setLoading(true);
       const total = Number(selectedOrder.total || 0);
       const adv = Number(editAdvancePaid || 0);
-      const paid = Number(editTotalPaid || 0);
-      const due = Math.max(0, total - adv - paid);
+      const due = Math.max(0, total - adv);
 
       const { error } = await supabase
         .from('orders')
@@ -963,7 +960,7 @@ export const AdminDashboard: React.FC = () => {
           city: editCustCity.trim(),
           order_source: editOrderSource,
           advance_paid_amount: adv,
-          total_paid_amount: paid,
+          total_paid_amount: 0,
           courier_collection_amount: Number(editCourierCollection || 0),
           courier_name: editCourierName.trim(),
           courier_tracking_number: editCourierTracking.trim(),
@@ -986,7 +983,7 @@ export const AdminDashboard: React.FC = () => {
         city: editCustCity.trim(),
         order_source: editOrderSource,
         advance_paid_amount: adv,
-        total_paid_amount: paid,
+        total_paid_amount: 0,
         courier_collection_amount: Number(editCourierCollection || 0),
         courier_name: editCourierName.trim(),
         courier_tracking_number: editCourierTracking.trim(),
@@ -2281,17 +2278,6 @@ export const AdminDashboard: React.FC = () => {
                           />
                         </div>
                         <div>
-                          <label style={{ display: 'block', fontWeight: 'bold', color: 'gray', marginBottom: '4px' }}>সম্পূর্ণ বিল পরিশোধিত? (Fully Paid?):</label>
-                          <select 
-                            value={Number(editTotalPaid || 0) > 0 ? "yes" : "no"}
-                            onChange={(e) => setEditTotalPaid(e.target.value === "yes" ? String(Math.max(0, Number(selectedOrder.total || 0) - Number(editAdvancePaid || 0))) : '')}
-                            style={{ width: '100%', padding: '6px 10px', border: '1px solid var(--color-border)', borderRadius: '4px', backgroundColor: '#fff' }}
-                          >
-                            <option value="no">না (No)</option>
-                            <option value="yes">হ্যাঁ (Yes)</option>
-                          </select>
-                        </div>
-                        <div>
                           <label style={{ display: 'block', fontWeight: 'bold', color: 'gray', marginBottom: '4px' }}>কুরিয়ার কালেকশন (Courier Collection):</label>
                           <input 
                             type="number" 
@@ -2368,12 +2354,12 @@ export const AdminDashboard: React.FC = () => {
                               <strong>৳{selectedOrder.total}</strong>
                             </div>
                             <div style={{ background: '#e8f5e9', padding: '8px', borderRadius: '4px' }}>
-                              <span style={{ display: 'block', color: 'gray' }}>পরিশোধিত:</span>
-                              <strong style={{ color: 'green' }}>৳{Number(editAdvancePaid || 0) + Number(editTotalPaid || 0)}</strong>
+                              <span style={{ display: 'block', color: 'gray' }}>অগ্রিম পরিশোধ:</span>
+                              <strong style={{ color: 'green' }}>৳{Number(editAdvancePaid || 0)}</strong>
                             </div>
                             <div style={{ background: '#ffebee', padding: '8px', borderRadius: '4px' }}>
                               <span style={{ display: 'block', color: 'gray' }}>বাকি বকেয়া (Due):</span>
-                              <strong style={{ color: 'red' }}>৳{selectedOrder.total - Number(editAdvancePaid || 0) - Number(editTotalPaid || 0)}</strong>
+                              <strong style={{ color: 'red' }}>৳{Math.max(0, Number(selectedOrder.total || 0) - Number(editAdvancePaid || 0))}</strong>
                             </div>
                           </div>
                         </div>

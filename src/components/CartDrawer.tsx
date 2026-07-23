@@ -6,7 +6,7 @@ import { trackBeginCheckout } from '../analytics/analytics';
 import { useNavigate } from 'react-router-dom';
 
 interface CartDrawerProps {
-  onOpenCheckout: () => void;
+  onOpenCheckout?: () => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
@@ -58,7 +58,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   const handleCheckoutClick = () => {
     trackBeginCheckout(cartItems);
     setCartOpen(false);
-    onOpenCheckout();
+    if (onOpenCheckout) onOpenCheckout();
+    navigate('/checkout');
   };
 
   const handleViewCartClick = () => {

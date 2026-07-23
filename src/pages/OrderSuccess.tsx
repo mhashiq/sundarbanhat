@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { CheckCircle, ArrowRight, DollarSign, Upload, AlertCircle } from 'lucide-react';
 import { dataService, getImageUrl } from '../services/dataService';
-import { supabase } from '../supabase/supabase';
 import type { PaymentMethod } from '../services/dataService';
 
 interface SavedOrder {
@@ -135,11 +134,14 @@ const PAYMENT_INSTRUCTIONS: Record<PaymentMethod, {
   }
 };
 
+import { OrderSuccessNotification } from '../components/OrderSuccessNotification';
+
 export const OrderSuccess: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<ConfirmationOrderView | null>(null);
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(true);
   
   // Manual Payment Form state
   const [showPayForm, setShowPayForm] = useState(false);
@@ -158,12 +160,37 @@ export const OrderSuccess: React.FC = () => {
       setLoadingOrder(true);
       setLoadError('');
 
-      const saved = localStorage.getItem(`sh_order_${orderId}`);
+      const saved = localStorage.getItem(`sh_order_${orderId}`) || localStorage.getItem('sh_latest_order');
       if (saved) {
         try {
           const orderData = JSON.parse(saved) as SavedOrder;
           setPayAmount(orderData.total);
           setPayMethod((orderData.paymentMethod as PaymentMethod) || 'bkash');
+          setOrder({
+            orderId: orderData.orderId || orderId,
+            dbOrderId: orderData.dbOrderId || orderId,
+            transactionId: orderData.orderId || orderId,
+            customerName: orderData.name || 'গ্রাহক',
+            phone: orderData.phone || '',
+            address: orderData.address || '',
+            district: orderData.city || '',
+            createdAt: orderData.date || new Date().toISOString(),
+            paymentMethod: (orderData.paymentMethod as PaymentMethod) || 'bkash',
+            paymentStatus: 'pending_payment',
+            orderStatus: 'pending_payment',
+            subtotal: orderData.subtotal || 0,
+            shippingCost: orderData.shippingCost || 0,
+            discount: 0,
+            total: orderData.total || 0,
+            items: (orderData.items || []).map(item => ({
+              ...item,
+              category: '',
+              priceNum: item.priceNum
+            })),
+            payments: [],
+            history: []
+          });
+          setLoadingOrder(false);
         } catch {
           // Ignore fallback parse errors; DB fetch below will decide the page state.
         }
@@ -171,39 +198,7 @@ export const OrderSuccess: React.FC = () => {
 
       const dbOrder = await dataService.getOrderByTransactionId(orderId);
       if (!dbOrder) {
-        if (saved) {
-          try {
-            const orderData = JSON.parse(saved) as SavedOrder;
-            setOrder({
-              orderId: orderData.orderId,
-              dbOrderId: orderData.dbOrderId,
-              transactionId: orderData.orderId,
-              customerName: orderData.name,
-              phone: orderData.phone,
-              address: orderData.address,
-              district: orderData.city,
-              createdAt: orderData.date,
-              paymentMethod: (orderData.paymentMethod as PaymentMethod) || 'bkash',
-              paymentStatus: 'pending_payment',
-              orderStatus: 'pending_payment',
-              subtotal: orderData.subtotal,
-              shippingCost: orderData.shippingCost,
-              discount: 0,
-              total: orderData.total,
-              items: orderData.items.map(item => ({
-                ...item,
-                category: '',
-                priceNum: item.priceNum
-              })),
-              payments: [],
-              history: []
-            });
-            setPayAmount(orderData.total);
-            setPayMethod((orderData.paymentMethod as PaymentMethod) || 'bkash');
-          } catch {
-            setLoadError('অর্ডার খুঁজে পাওয়া যায়নি।');
-          }
-        } else {
+        if (!saved) {
           setLoadError('অর্ডার খুঁজে পাওয়া যায়নি।');
         }
         setLoadingOrder(false);
@@ -288,71 +283,14 @@ export const OrderSuccess: React.FC = () => {
     setPayUploading(true);
 
     try {
-      let fileUrl = '';
-      let uploadedFileName = '';
-
-      // Upload screenshot to storage if selected
-      if (payFile) {
-        const fileExt = payFile.name.split('.').pop();
-        uploadedFileName = `${order.dbOrderId}-${Date.now()}.${fileExt}`;
-        const filePath = `payments/${uploadedFileName}`;
-
-        const { error: uploadErr } = await supabase.storage
-          .from('payment-proofs')
-          .upload(filePath, payFile);
-
-        if (uploadErr) throw uploadErr;
-        fileUrl = `storage/payment-proofs/${filePath}`;
-      }
-
-      // 1. Insert payment record into database
-      const { data: paymentRow, error: paymentErr } = await supabase
-        .from('payments')
-        .insert({
-          order_id: order.dbOrderId,
-          payment_method: payMethod,
-          transaction_id: payTxId.trim(),
-          amount: payAmount,
-          screenshot_url: fileUrl || null,
-          status: 'under_review'
-        })
-        .select('id')
-        .single();
-
-      if (paymentErr) throw paymentErr;
-
-      const paymentId = paymentRow?.id;
-
-      if (paymentId && fileUrl) {
-        const { error: proofErr } = await supabase
-          .from('payment_proofs')
-          .insert({
-            payment_id: paymentId,
-            screenshot_url: fileUrl,
-            file_name: payFile?.name || uploadedFileName || null,
-            content_type: payFile?.type || null,
-            notes: payTxId.trim()
-          });
-
-        if (proofErr) throw proofErr;
-      }
-
-      // 2. Update order status to payment_submitted
-      const { error: orderStatusErr } = await supabase
-        .from('orders')
-        .update({ order_status: 'payment_submitted', payment_status: 'payment_submitted' })
-        .eq('id', order.dbOrderId);
-
-      if (orderStatusErr) throw orderStatusErr;
-
-      // 3. Log status history tracking entry in database
-      await supabase
-        .from('order_status_history')
-        .insert({
-          order_id: order.dbOrderId,
-          status: 'payment_submitted',
-          notes: `সরাসরি রসিদ পাতা থেকে পেমেন্ট জমা দেওয়া হয়েছে। মেথড: ${payMethod}, TrxID: ${payTxId}`
-        });
+      await dataService.submitPaymentRecord({
+        orderId: order.dbOrderId,
+        paymentMethod: payMethod,
+        transactionId: payTxId.trim(),
+        amount: payAmount,
+        proofFile: payFile,
+        notes: `সরাসরি রসিদ পাতা থেকে পেমেন্ট জমা দেওয়া হয়েছে। মেথড: ${payMethod}, TrxID: ${payTxId}`
+      });
 
       // 4. Push custom event to GTM Data Layer
       if (window.dataLayer) {
@@ -378,33 +316,40 @@ export const OrderSuccess: React.FC = () => {
   };
 
   return (
-    <section className="section" style={{ backgroundColor: 'var(--color-sand)', minHeight: '80vh', paddingTop: '40px' }}>
-      <Helmet>
-        <title>ধন্যবাদ - আপনার অর্ডার সফল হয়েছে</title>
-        <meta name="description" content="সুন্দরবন হাট থেকে আপনার কেনাকাটা সম্পন্ন হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ।" />
-      </Helmet>
+    <>
+      <OrderSuccessNotification
+        orderId={order.orderId}
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
 
-      <div className="container" style={{ maxWidth: '750px', margin: '0 auto' }}>
-        
-        {/* Receipt wrapper card */}
-        <div style={{
-          background: '#fff',
-          padding: '40px',
-          borderRadius: 'var(--border-radius-lg)',
-          border: '1px solid var(--color-border)',
-          boxShadow: '0 10px 25px var(--color-shadow)',
-          marginBottom: '30px'
-        }}>
+      <section className="section" style={{ backgroundColor: 'var(--color-sand)', minHeight: '80vh', paddingTop: '40px' }}>
+        <Helmet>
+          <title>ধন্যবাদ - আপনার অর্ডার সফল হয়েছে</title>
+          <meta name="description" content="সুন্দরবন হাট থেকে আপনার কেনাকাটা সম্পন্ন হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ।" />
+        </Helmet>
+
+        <div className="container" style={{ maxWidth: '750px', margin: '0 auto' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-            <CheckCircle size={64} style={{ color: 'var(--color-mangrove)', marginBottom: '15px' }} />
-            <h2 style={{ color: 'var(--color-forest-dark)', fontSize: '2rem', fontWeight: '800', margin: '0 0 10px' }}>
-              🎉 Thank You for Your Order!
-            </h2>
-            <p style={{ color: 'gray', fontSize: '1.02rem', margin: 0 }}>
-              Thank you for shopping with us. Your order has been received successfully and is currently awaiting manual confirmation. We will review your order and update its status as soon as possible.
-            </p>
-          </div>
+          {/* Receipt wrapper card */}
+          <div style={{
+            background: '#fff',
+            padding: '40px',
+            borderRadius: 'var(--border-radius-lg)',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 10px 25px var(--color-shadow)',
+            marginBottom: '30px'
+          }}>
+            
+            <div style={{ textAlign: 'center', marginBottom: '25px' }}>
+              <CheckCircle size={64} style={{ color: 'var(--color-mangrove)', marginBottom: '15px' }} />
+              <h2 style={{ color: 'var(--color-forest-dark)', fontSize: '2rem', fontWeight: '800', margin: '0 0 10px' }}>
+                🎉 আপনার অর্ডারের জন্য ধন্যবাদ!
+              </h2>
+              <p style={{ color: 'gray', fontSize: '1.02rem', margin: 0 }}>
+                আপনার অর্ডারটি সফলভাবে আমাদের সিস্টেমে যুক্ত হয়েছে। আমাদের টিম খুব শীঘ্রই আপনার অর্ডার যাচাই করে আপনার সঙ্গে যোগাযোগ করবে।
+              </p>
+            </div>
 
           {/* Order Summary */}
           <div style={{
@@ -763,5 +708,6 @@ export const OrderSuccess: React.FC = () => {
 
       </div>
     </section>
+    </>
   );
 };

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService, getImageUrl } from '../services/dataService';
 import type { Product, Review, Faq } from '../services/dataService';
-import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/CartContext';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { trackViewItemList, trackSelectItem } from '../analytics/analytics';
+import { SundarbanJourneySection } from '../components/SundarbanJourneySection';
 
 export const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -99,6 +99,36 @@ export const Home: React.FC = () => {
       }
     }))
   };
+  const heroSlides = [
+    {
+      img: '/sundarbanboat.jpg',
+      tag: '🍃 সুন্দরবনের প্রাকৃতিক খাদ্য',
+      title: 'সুন্দরবনের খাঁটি স্বাদ,\nসরাসরি আপনার ঘরে',
+      desc: 'সুন্দরবনের গহীন বন ও লোনা পানির ঘের থেকে সংগৃহীত ১০০% নিরাপদ পণ্য।'
+    },
+    {
+      img: '/honey.webp',
+      tag: '🍯 ১০০% খাঁটি কাঁচা মধু',
+      title: 'পাহাড় ও বনের খলিশা মধু,\nপ্রাকৃতিক ও বিশুদ্ধ সুবাস',
+      desc: 'কোনো তাপ বা চিনি ছাড়া প্রাকৃতিক ধোঁয়া পদ্ধতিতে সরাসরি চাক ভাঙা।'
+    },
+    {
+      img: '/prawn.jpg',
+      tag: '🦐 তাজা বাগদা ও গলদা চিংড়ি',
+      title: 'সাতক্ষীরার সতেজ চিংড়ি,\nবরফ শীতল সতেজ ডেলিভারি',
+      desc: 'শ্যামনগরের লোনা ঘের থেকে তুলে দ্রুততম ডেলিভারি ব্যবস্থা।'
+    }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
   return (
     <>
       <Helmet>
@@ -111,52 +141,178 @@ export const Home: React.FC = () => {
         </script>
       </Helmet>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <img src={getImageUrl('/sundarbanboat.jpg')} className="hero-bg" alt="সুন্দরবনের নদী ও নৌকা" />
-        <div className="hero-overlay"></div>
-        <div className="container hero-container">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="hero-editorial">🍃 খাদি ও প্রাকৃতিক উপকূলীয় খাদ্য</span>
-            <h1 className="hero-title">সুন্দরবনের খাঁটি স্বাদ,<br />সরাসরি আপনার ঘরে</h1>
-            <p className="hero-desc">
-              বাঘের রাজত্ব সুন্দরবনের গহীন বন ও সাতক্ষীরা শ্যামনগরের লোনা ঘের থেকে সরাসরি সংগৃহীত ১০০% খাঁটি, নিরাপদ ও রাসায়নিকমুক্ত খাদ্যপণ্য।
-            </p>
-            <div className="hero-ctas">
-              <Link to="/products" className="btn btn-primary">
-                🛒 পণ্যসমূহ দেখুন
-              </Link>
-              <a href="https://wa.me/8801873520181" target="_blank" rel="noreferrer" className="btn btn-whatsapp">
-                💬 WhatsApp করুন
-              </a>
-              <a href="tel:+8801873520181" className="btn btn-secondary">
-                📞 কল করুন
-              </a>
-            </div>
-            
-            <div className="hero-badges-wrapper">
-              <div className="hero-badge-item">
-                <span className="hero-badge-icon">🍯</span>
-                <span className="hero-badge-text">১০০% কাঁচা মধু</span>
-              </div>
-              <div className="hero-badge-item">
-                <span className="hero-badge-icon">🦐</span>
-                <span className="hero-badge-text">সতেজ চিংড়ি</span>
-              </div>
-              <div className="hero-badge-item">
-                <span className="hero-badge-icon">🌾</span>
-                <span className="hero-badge-text">ভেজালমুক্ত চাল</span>
-              </div>
-              <div className="hero-badge-item">
-                <span className="hero-badge-icon">🛡️</span>
-                <span className="hero-badge-text">প্রাকৃতিক নিরাপদ</span>
-              </div>
-            </div>
-          </motion.div>
+      {/* Optimized Compact Mobile & Desktop Hero Slider */}
+      <section className="sh-hero-slider">
+        <style>{`
+          .sh-hero-slider {
+            position: relative;
+            height: clamp(280px, 45vh, 340px);
+            max-height: 380px;
+            overflow: hidden;
+            color: #FFFFFF;
+            font-family: 'Hind Siliguri', sans-serif;
+            background: #072211;
+          }
+          .sh-hero-slide-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 1;
+          }
+          .sh-hero-slide-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(7, 34, 17, 0.45) 0%, rgba(7, 34, 17, 0.88) 100%);
+            z-index: 2;
+          }
+          .sh-hero-slide-content {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px 16px 24px;
+            max-width: 680px;
+            margin: 0 auto;
+          }
+          .sh-hero-logo {
+            width: clamp(80px, 20vw, 110px);
+            max-height: 48px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+          }
+          .sh-hero-tag {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--color-honey);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+          }
+          .sh-hero-heading {
+            font-size: clamp(1.45rem, 5.2vw, 2.1rem);
+            font-weight: 800;
+            line-height: 1.2;
+            color: #FFFFFF;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            white-space: pre-line;
+          }
+          .sh-hero-sub {
+            font-size: clamp(0.82rem, 3vw, 0.95rem);
+            color: #E2E8F0;
+            margin-bottom: 14px;
+            line-height: 1.35;
+            max-width: 520px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          .sh-hero-btns {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+          }
+          .sh-hero-btn-main {
+            background: linear-gradient(135deg, #2E7D32, #15803D);
+            color: #FFFFFF;
+            padding: 10px 22px;
+            border-radius: 99px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+          }
+          .sh-hero-btn-sec {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .sh-hero-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            display: flex;
+            gap: 6px;
+          }
+          .sh-hero-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+          }
+          .sh-hero-dot.active {
+            width: 22px;
+            border-radius: 99px;
+            background: #FFFFFF;
+          }
+        `}</style>
+
+        {heroSlides.map((slide, idx) => (
+          <img
+            key={idx}
+            src={getImageUrl(slide.img)}
+            alt={slide.title}
+            className="sh-hero-slide-bg"
+            style={{ opacity: currentSlide === idx ? 1 : 0 }}
+          />
+        ))}
+
+        <div className="sh-hero-slide-overlay" />
+
+        <div className="sh-hero-slide-content">
+          <img src="/logo.png" alt="সুন্দরবন হাট" className="sh-hero-logo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          <span className="sh-hero-tag">{heroSlides[currentSlide].tag}</span>
+          <h1 className="sh-hero-heading">{heroSlides[currentSlide].title}</h1>
+          <p className="sh-hero-sub">{heroSlides[currentSlide].desc}</p>
+          <div className="sh-hero-btns">
+            <Link to="/products" className="sh-hero-btn-main">
+              🛍️ এখনই কিনুন
+            </Link>
+            <Link to="/products" className="sh-hero-btn-sec">
+              📦 সব পণ্য
+            </Link>
+          </div>
+        </div>
+
+        <div className="sh-hero-dots">
+          {heroSlides.map((_, idx) => (
+            <button
+              key={idx}
+              className={`sh-hero-dot ${currentSlide === idx ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(idx)}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -167,98 +323,7 @@ export const Home: React.FC = () => {
         </svg>
       </div>
 
-      {/* Story Timeline */}
-      <section className="section" style={{ backgroundColor: 'var(--color-sand)' }}>
-        <div className="container">
-          <div className="section-header">
-            <span className="section-subtitle">আমাদের সংগ্রহের নদীর পথ</span>
-            <h2 className="section-title">খাঁটি খাদ্য সংগ্রহের জীবনযাত্রা</h2>
-            <p className="section-desc">মধু সংগ্রাহক (মৌয়াল) থেকে শুরু করে আপনার বাড়ির রান্নাঘর পর্যন্ত আমাদের প্রতিটি পণ্যের যাত্রা সম্পূর্ণ প্রাকৃতিক ও ঐতিহ্যবাহী।</p>
-          </div>
 
-          <div className="timeline-river-container">
-            <div className="timeline-river-path"></div>
-            
-            <div className="timeline-block">
-              <div className="timeline-point"></div>
-              <div className="timeline-block-content">
-                <h3 style={{ color: 'var(--color-mangrove)', marginBottom: '8px' }}>১. গহীন সুন্দরবনে যাত্রা</h3>
-                <p>মৌয়ালরা কাঠের নৌকা নিয়ে সুন্দরবনের গহীন ম্যানগ্রোভে যান। বাঘ ও কুমিরের শত বাধা এড়িয়ে খলিশা ও গরান ফুলের খাঁটি চাক খোঁজেন।</p>
-              </div>
-            </div>
-
-            <div className="timeline-block">
-              <div className="timeline-point"></div>
-              <div className="timeline-block-content">
-                <h3 style={{ color: 'var(--color-mangrove)', marginBottom: '8px' }}>২. চাক ভাঙা ও সংগ্রহ</h3>
-                <p>মৌমাছি না মেরে ধোঁয়া দিয়ে প্রাকৃতিকভাবে চাক থেকে কাঁচা মধু সংগ্রহ করা হয়। কোনো প্রকার কেমিক্যাল বা গরম করা হয় না।</p>
-              </div>
-            </div>
-
-            <div className="timeline-block">
-              <div className="timeline-point"></div>
-              <div className="timeline-block-content">
-                <h3 style={{ color: 'var(--color-mangrove)', marginBottom: '8px' }}>৩. লোনা পানির চিংড়ি আহরণ</h3>
-                <p>ভোর রাতে সাতক্ষীরা শ্যামনগরের লোনা পানির ঘের থেকে জেলেরা তাজা বাগদা ও গলদা চিংড়ি জাল দিয়ে সতেজ অবস্থায় তুলে আনেন।</p>
-              </div>
-            </div>
-
-            <div className="timeline-block">
-              <div className="timeline-point"></div>
-              <div className="timeline-block-content">
-                <h3 style={{ color: 'var(--color-mangrove)', marginBottom: '8px' }}>৪. বিশুদ্ধ ল্যাব ও মান পরীক্ষা</h3>
-                <p>সংগৃহীত মধু এবং মাছের আর্দ্রতা ও বিশুদ্ধতা পরীক্ষা করা হয়। আমরা শতভাগ নিশ্চিত করি পণ্যগুলোতে কোনো ক্ষতিকর ফরমালিন বা প্রিজারভেটিভ নেই।</p>
-              </div>
-            </div>
-
-            <div className="timeline-block">
-              <div className="timeline-point"></div>
-              <div className="timeline-block-content">
-                <h3 style={{ color: 'var(--color-mangrove)', marginBottom: '8px' }}>৫. সতেজ প্যাকেজিং ও পরিবেশন</h3>
-                <p>মাছগুলো পর্যাপ্ত বরফসহ এয়ার-টাইট কর্কশিট বক্সে এবং মধুগুলো প্রিমিয়াম ফুড-গ্রেড বোতলে উপকূলের হাব থেকে সরাসরি আপনার ঠিকানায় পাঠানো হয়।</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Category Floating Islands Section */}
-      <section className="section" style={{ backgroundColor: '#F0EAE1', borderTop: '1px solid var(--color-border)' }}>
-        <div className="container">
-          <div className="section-header">
-            <span className="section-subtitle">উপকূলের দ্বীপসমূহ</span>
-            <h2 className="section-title">পণ্য ক্যাটাগরি দ্বীপ</h2>
-            <p className="section-desc">নদীর ধার ঘেঁষে গড়ে ওঠা একেকটি প্রাকৃতি দ্বীপের মতো সাজানো আমাদের অফারসমূহ।</p>
-          </div>
-
-          <div className="categories-islands-wrapper">
-            <div className={`category-island-node ${activeFilter === 'honey' ? 'active' : ''}`} onClick={() => handleFilter('honey')}>
-              <span className="island-icon">🍯</span>
-              <span className="island-name">সুন্দরবনের মধু</span>
-            </div>
-            <div className={`category-island-node ${activeFilter === 'shrimp' ? 'active' : ''}`} onClick={() => handleFilter('shrimp')}>
-              <span className="island-icon">🦐</span>
-              <span className="island-name">বাগদা ও গলদা</span>
-            </div>
-            <div className={`category-island-node ${activeFilter === 'fruit' ? 'active' : ''}`} onClick={() => handleFilter('fruit')}>
-              <span className="island-icon">🥭</span>
-              <span className="island-name">মৌসুমি আম</span>
-            </div>
-            <div className={`category-island-node ${activeFilter === 'oil' ? 'active' : ''}`} onClick={() => handleFilter('oil')}>
-              <span className="island-icon">🛢</span>
-              <span className="island-name">ঘানির তেল</span>
-            </div>
-            <div className={`category-island-node ${activeFilter === 'grain' ? 'active' : ''}`} onClick={() => handleFilter('grain')}>
-              <span className="island-icon">🌾</span>
-              <span className="island-name">দেশি চাল</span>
-            </div>
-            <div className={`category-island-node ${activeFilter === 'shutki' ? 'active' : ''}`} onClick={() => handleFilter('shutki')}>
-              <span className="island-icon">🐚</span>
-              <span className="island-name">চিংড়ি শুঁটকি</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Alternating Pinterest Magazine Product Section */}
       <section className="section" style={{ backgroundColor: 'var(--color-sand)' }}>
@@ -381,6 +446,9 @@ export const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Sundarban to Table Journey Storytelling Section */}
+      <SundarbanJourneySection />
 
       {/* Parallax Village life documentary */}
       <section className="section" style={{ padding: 0, position: 'relative' }}>

@@ -243,8 +243,7 @@ export const AdminOrderDetails: React.FC = () => {
                 <div style={{ display: 'grid', gap: '10px', color: '#334155' }}>
                   <div><strong>Payment Method:</strong> {order.payment_method}</div>
                   <div><strong>Advance Paid:</strong> {formatCurrency(Number(order.advance_paid_amount || 0))}</div>
-                  <div><strong>Total Paid:</strong> {formatCurrency(Number(order.total_paid_amount || 0))}</div>
-                  <div><strong>Due Amount:</strong> {formatCurrency(Number(order.due_amount || 0))}</div>
+                  <div><strong>Due Amount:</strong> {formatCurrency(Number(order.due_amount !== undefined && order.due_amount !== null ? order.due_amount : Math.max(0, Number(order.total || 0) - Number(order.advance_paid_amount || 0))))}</div>
                   <div><strong>Payment Notes:</strong> {order.payment_notes || 'N/A'}</div>
                 </div>
                 {paymentProof && (

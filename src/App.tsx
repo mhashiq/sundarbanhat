@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
       {!isAdminRoute && <Header />}
       
       {/* Global Cart Drawer Overlay */}
-      {!isAdminRoute && <CartDrawer onOpenCheckout={() => window.location.hash = '#/checkout'} />}
+      {!isAdminRoute && <CartDrawer onOpenCheckout={() => {}} />}
       
       {/* Real-time Analytics Debugger (restricted to development/toggle mode) */}
       <AnalyticsDebugger />
@@ -68,14 +68,14 @@ const AppContent: React.FC = () => {
           <Route path="/why-us" element={<WhyUs />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* Customer Auth Routes */}
+          {/* Customer Auth & Checkout Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-success/:orderId" element={<OrderSuccess />} />
           
           {/* Protected Customer Routes */}
           <Route element={<CustomerGuard />}>
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-success/:orderId" element={<OrderSuccess />} />
             <Route path="/account" element={<Account />} />
             <Route path="/account/orders/:transactionId" element={<OrderDetails />} />
           </Route>
